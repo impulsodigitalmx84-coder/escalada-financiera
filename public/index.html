@@ -4,7 +4,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+<!-- 📊 GRÁFICAS DE VELAS JAPONESAS — TradingView Lightweight Charts -->
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.min.js"></script>
+</head>
         <style>
 :root {
     --fondo-principal: #050C18;
@@ -381,8 +383,64 @@ button { border: none; background: none; color: inherit; cursor: pointer; }
     .papelera, .papelera * { visibility: visible; }
     .papelera { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; }
 }
-</style>
 
+/* 📊 GRÁFICA DE VELAS JAPONESAS */
+.grafica-seccion {
+  margin: 16px;
+  background: var(--fondo-tarjeta);
+  border-radius: 12px;
+  border: 1px solid var(--borde);
+  padding: 16px;
+}
+
+.grafica-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.grafica-simbolo {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--dorado);
+}
+
+.grafica-tiempo {
+  display: flex;
+  gap: 6px;
+}
+
+.tiempo-btn {
+  padding: 6px 12px;
+  background: transparent;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto-secundario);
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.tiempo-btn.activo {
+  background: var(--dorado);
+  color: #000;
+  border-color: var(--dorado);
+}
+
+.tiempo-btn:active {
+  transform: scale(0.95);
+}
+
+.grafica-contenedor {
+  width: 100%;
+  height: 320px;
+  border-radius: 8px;
+  background: #0A0F1A;
+}
+ 
     </style>
 </head>
 <body>
@@ -649,7 +707,99 @@ Estado: PENDIENTE DE CONFIRMACIÓN
 ═══════════════════════════════════
     `.trim();
     navigator.clipboard.writeText(texto).then(()=>mostrarToast("✅ Copiado al portapapeles","exito"));
+}// ==============================================
+// 📊 GRÁFICA DE VELAS JAPONESAS — TWELVE DATA
+// ==============================================
+let grafica = null;
+let serieVelas = null;
+let simboloActivo = "XAU/USD";
+let intervaloActivo = "15min";
+
+function inicializarGrafica() {
+  const contenedor = document.getElementById('graficaContenedor');
+  if (!contenedor) return;
+
+  grafica = LightweightCharts.createChart(contenedor, {
+    layout: { background: { color: '#0A0F1A' }, textColor: '#94A3B8' },
+    grid: { vertLines: { color: '#1E293B' }, horzLines: { color: '#1E293B' } },
+    crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: '#C8A951' }, horzLine: { color: '#C8A951' } },
+    priceScale: { borderColor: '#334155' },
+    timeScale: { borderColor: '#334155', timeVisible: true },
+    width: contenedor.clientWidth, height: 320,
+  });
+
+  serieVelas = grafica.addCandlestickSeries({
+    upColor: '#00C076', downColor: '#FF4757',
+    borderUpColor: '#00C076', borderDownColor: '#FF4757',
+    wickUpColor: '#00C076', wickDownColor: '#FF4757',
+  });
+
+  window.addEventListener('resize', () => grafica.applyOptions({ width: contenedor.clientWidth }));
+  cargarVelas(simboloActivo, intervaloActivo);
 }
+
+function mapearIntervalo(tiempoBtn) {
+  const mapa = { '15min':'15min','1h':'1h','4h':'4h','1day':'1day' };
+  return mapa[tiempoBtn] || '15min';
+}
+
+async function cargarVelas(simbolo, tiempoBtn) {
+  if (!serieVelas) return;
+  const intervalo = mapearIntervalo(tiempoBtn);
+  try {
+    const res = await fetch(`/api/velas?simbolo=${encodeURIComponent(simbolo)}&intervalo=${intervalo}`);
+    const datos = await res.json();
+    if (!datos.exito || !datos.velas?.length) return cargarVelasSimuladas();
+    const velasFormateadas = datos.velas.map(v => ({
+      time: v.datetime?.split(' ')[0] || v.time,
+      open: parseFloat(v.open), high: parseFloat(v.high), low: parseFloat(v.low), close: parseFloat(v.close)
+    })).reverse();
+    serieVelas.setData(velasFormateadas);
+    grafica.timeScale().fitContent();
+  } catch { cargarVelasSimuladas(); }
+}
+
+function cargarVelasSimuladas() {
+  const velas = []; let precio = 1900; const hoy = new Date();
+  for (let i = 50; i >= 0; i--) {
+    const fecha = new Date(hoy); fecha.setDate(fecha.getDate() - i);
+    const variacion = (Math.random() - 0.5) * 10;
+    const open = precio, close = precio + variacion;
+    const high = Math.max(open, close) + Math.random() * 5;
+    const low = Math.min(open, close) - Math.random() * 5;
+    velas.push({
+      time: fecha.toISOString().split('T')[0],
+      open: parseFloat(open.toFixed(2)), high: parseFloat(high.toFixed(2)),
+      low: parseFloat(low.toFixed(2)), close: parseFloat(close.toFixed(2))
+    });
+    precio = close;
+  }
+  serieVelas.setData(velas);
+  grafica.timeScale().fitContent();
+}
+
+document.addEventListener('click', (e) => {
+  const item = e.target.closest('.mercado-item');
+  if (item) {
+    simboloActivo = item.dataset.simbolo;
+    document.getElementById('graficaSimbolo').textContent = simboloActivo;
+    document.getElementById('seccionGrafica').classList.remove('oculto');
+    cargarVelas(simboloActivo, intervaloActivo);
+  }
+});
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.tiempo-btn');
+  if (btn) {
+    document.querySelectorAll('.tiempo-btn').forEach(b => b.classList.remove('activo'));
+    btn.classList.add('activo');
+    intervaloActivo = btn.dataset.tiempo;
+    cargarVelas(simboloActivo, intervaloActivo);
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => setTimeout(inicializarGrafica, 300));
+
 </script>
 </body>
 </html>
