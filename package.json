@@ -1,16 +1,13 @@
 {
   "name": "escalada-financiera",
   "version": "1.0.0",
-  "description": "Plataforma de Trading y Pagos OXXO Pay",
-  "main": "app.js",
+  "description": "Plataforma de Trading - Escalada Financiera",
+  "main": "index.html",
   "scripts": {
-    "start": "node app.js"
+    "start": "npx serve . -p 10000",
+    "build": "echo 'Build complete'"
   },
-  "dependencies": {
-    "express": "^4.18.2",
-    "node-fetch": "2.7.0"
-  },
-  "engines": {
-    "node": "18.x"
-  }
+  "keywords": ["trading", "finanzas"],
+  "author": "Daniel Alejandro Cortés Delgadillo",
+  "license": "MIT"
 }
