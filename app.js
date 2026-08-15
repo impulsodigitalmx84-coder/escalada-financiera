@@ -1,0 +1,494 @@
+const express = require('express');
+const fetch = require('node-fetch');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(express.json());
+app.use(express.static(__dirname));
+
+// 🔑 TU LLAVE DE DIGITAL FEMSA — REEMPLÁZALA POR LA TUYA
+const FEMSA_API_KEY = "key_eYvWV76blahblahblah";
+
+const pagos = new Map();
+
+// ==============================================
+// 🌐 PÁGINA PRINCIPAL
+// ==============================================
+app.get('/', (req, res) => {
+  res.send(`
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escalada Financiera</title>
+    <style>
+        * {margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+        :root {
+            --fondo:#0F1218; --tarjeta:#1A1F2E; --tarjeta-2:#242A38; --borde:#2D3345;
+            --texto:#FFFFFF; --texto-sec:#8F98A8; --dorado:#D4AF37;
+            --verde:#00C48C; --rojo:#FF5252; --azul-boton:#2563EB;
+        }
+        body {background:var(--fondo);color:var(--texto);min-height:100vh;padding-bottom:80px;}
+        .oculto {display:none !important;} button {border:none;background:none;color:inherit;cursor:pointer}
+        
+        .top-bar {padding:12px 16px;display:flex;align-items:center;justify-content:space-between;}
+        .saldo-header {text-align:center;flex:1;}
+        .saldo-tit {font-size:12px;color:var(--texto-sec);}
+        .saldo-val {font-size:20px;font-weight:700;}
+        .icon-btn {width:36px;height:36px;border-radius:50%;background:var(--tarjeta);display:flex;align-items:center;justify-content:center;font-size:18px;}
+
+        .search-bar {margin:0 16px 16px;position:relative;}
+        .search-input {width:100%;padding:12px 12px 12px 40px;background:var(--tarjeta);border:1px solid var(--borde);border-radius:12px;color:var(--texto);font-size:15px;}
+        .search-icon {position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--texto-sec);}
+
+        .categorias {display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px 20px;}
+        .cat-btn {background:var(--tarjeta);border-radius:12px;padding:16px 8px;text-align:center;transition:.2s;border:1px solid transparent;}
+        .cat-btn.activo {border-color:var(--dorado);background:var(--tarjeta-2);}
+        .cat-icon {font-size:20px;margin-bottom:4px;}
+        .cat-nom {font-size:12px;font-weight:500;}
+
+        .seccion-tit {font-size:14px;color:var(--texto-sec);padding:0 16px 10px;}
+        .lista-mercados {padding:0 16px;}
+        .mercado-item {display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--borde);}
+        .mercado-nom {font-size:15px;font-weight:500;}
+        .mercado-desc {font-size:12px;color:var(--texto-sec);margin-top:2px;}
+        .mercado-precios {text-align:right;}
+        .precio-compra {font-size:15px;font-weight:600;}
+        .cambio-pos {color:var(--verde);font-size:12px;}
+        .cambio-neg {color:var(--rojo);font-size:12px;}
+
+        .op-header {padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--borde);}
+        .op-tit {font-size:18px;font-weight:600;}
+        .form-section {padding:16px;}
+        .form-tit {font-size:16px;font-weight:600;margin-bottom:16px;}
+        .input-group {margin-bottom:16px;}
+        .input-group label {display:block;font-size:13px;color:var(--texto-sec);margin-bottom:6px;}
+        .input-group input {width:100%;padding:14px;background:var(--tarjeta);border:1px solid var(--borde);border-radius:10px;color:var(--texto);font-size:15px;}
+        .metodo-pago {display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--borde);cursor:pointer;}
+        .metodo-icon {width:40px;height:40px;border-radius:10px;background:var(--tarjeta);display:flex;align-items:center;justify-content:center;font-size:20px;}
+        .metodo-info {flex:1;}
+        .metodo-nom {font-size:15px;font-weight:500;}
+        .metodo-desc {font-size:12px;color:var(--texto-sec);margin-top:2px;}
+        .papelera {background:#fff;color:#000;border-radius:12px;padding:20px;margin-top:16px;box-shadow:0 4px 12px rgba(0,0,0,.3);}
+        .papelera-header {text-align:center;border-bottom:2px dashed #ccc;padding-bottom:12px;margin-bottom:16px;}
+        .papelera-tit {font-size:18px;font-weight:700;color:#333;margin-bottom:4px;}
+        .papelera-sub {font-size:12px;color:#666;}
+        .papelera-fila {display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:14px;}
+        .papelera-fila:last-child {border-bottom:none;}
+        .papelera-etq {color:#666;}
+        .papelera-val {font-weight:600;text-align:right;max-width:55%;word-break:break-all;}
+        .papelera-destacado {background:#f5f5f5;padding:10px;border-radius:6px;margin:12px 0;}
+        .papelera-codigo {font-size:20px;font-weight:700;color:#2563EB;text-align:center;letter-spacing:1px;margin:12px 0;}
+        .papelera-pie {font-size:11px;color:#888;text-align:center;margin-top:16px;line-height:1.5;}
+        .btn-primario {width:100%;padding:16px;background:var(--dorado);color:#000;border-radius:12px;font-size:16px;font-weight:600;margin-top:8px;}
+        .btn-secundario {width:100%;padding:14px;background:var(--tarjeta);color:var(--texto);border-radius:12px;font-size:15px;font-weight:500;margin-top:10px;border:1px solid var(--borde);}
+        .bottom-nav {position:fixed;bottom:0;left:0;right:0;background:var(--tarjeta);border-top:1px solid var(--borde);display:flex;justify-content:space-around;padding:8px 0;z-index:100;}
+        .nav-item {display:flex;flex-direction:column;align-items:center;gap:2px;}
+        .nav-item span:first-child {font-size:20px;}
+        .nav-item span:last-child {font-size:11px;color:var(--texto-sec);}
+        .nav-item.activo span:last-child {color:var(--dorado);}
+        .toast {position:fixed;top:60px;left:16px;right:16px;background:var(--tarjeta-2);border:1px solid var(--dorado);border-radius:12px;padding:14px;z-index:200;animation:deslizar .3s ease;}
+        @keyframes deslizar {from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}
+        @media print {
+            body * {visibility:hidden;}
+            .papelera, .papelera * {visibility:visible;}
+            .papelera {position:absolute;left:0;top:0;width:100%;box-shadow:none;}
+        }
+    </style>
+</head>
+<body>
+
+<div id="pagInicio">
+    <div class="top-bar">
+        <button class="icon-btn">☰</button>
+        <div class="saldo-header">
+            <div class="saldo-tit">Saldo Disponible</div>
+            <div class="saldo-val" id="saldoTop">$10,000.00</div>
+        </div>
+        <button class="icon-btn" onclick="irDeposito()">+</button>
+    </div>
+
+    <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" placeholder="Buscar mercados...">
+    </div>
+
+    <div class="categorias">
+        <button class="cat-btn activo"><div class="cat-icon">🔥</div><div class="cat-nom">Populares</div></button>
+        <button class="cat-btn"><div class="cat-icon">📊</div><div class="cat-nom">Índices</div></button>
+        <button class="cat-btn"><div class="cat-icon">💱</div><div class="cat-nom">Forex</div></button>
+        <button class="cat-btn"><div class="cat-icon">📈</div><div class="cat-nom">Acciones</div></button>
+        <button class="cat-btn"><div class="cat-icon">⛏️</div><div class="cat-nom">Materias</div></button>
+        <button class="cat-btn"><div class="cat-icon">🪙</div><div class="cat-nom">Cripto</div></button>
+    </div>
+
+    <div class="seccion-tit">Mercados más activos</div>
+    <div class="lista-mercados">
+        <div class="mercado-item">
+            <div><div class="mercado-nom">XAU/USD</div><div class="mercado-desc">Oro</div></div>
+            <div class="mercado-precios"><div class="precio-compra">1,907.80</div><div class="cambio-pos">▲ 0.42%</div></div>
+        </div>
+        <div class="mercado-item">
+            <div><div class="mercado-nom">EUR/USD</div><div class="mercado-desc">Euro/Dólar</div></div>
+            <div class="mercado-precios"><div class="precio-compra">1.0875</div><div class="cambio-neg">▼ 0.15%</div></div>
+        </div>
+        <div class="mercado-item">
+            <div><div class="mercado-nom">BTC/USD</div><div class="mercado-desc">Bitcoin</div></div>
+            <div class="mercado-precios"><div class="precio-compra">68,450.25</div><div class="cambio-pos">▲ 1.23%</div></div>
+        </div>
+    </div>
+</div>
+
+<div id="pagDeposito" class="oculto">
+    <div class="op-header">
+        <button onclick="volverInicio()">←</button>
+        <div class="op-tit">Depositar Fondos</div>
+        <div></div>
+    </div>
+
+    <div class="form-section">
+        <div class="form-tit">Datos del Depósito</div>
+        <div class="input-group">
+            <label>Nombre de quien deposita</label>
+            <input type="text" id="nombreDepositante" placeholder="Nombre completo">
+        </div>
+        <div class="input-group">
+            <label>Correo electrónico</label>
+            <input type="email" id="emailDepositante" placeholder="correo@ejemplo.com">
+        </div>
+        <div class="input-group">
+            <label>Teléfono</label>
+            <input type="tel" id="telefonoDepositante" placeholder="+52 55 1234 5678">
+        </div>
+        <div class="input-group">
+            <label>Monto a depositar ($ MXN)</label>
+            <input type="number" id="montoDep" min="100" step="100" placeholder="Mínimo $100 MXN">
+        </div>
+    </div>
+
+    <div class="form-section">
+        <div class="form-tit">Métodos de Pago — México 🇲🇽</div>
+    </div>
+
+    <div id="metodosPago">
+        <div class="metodo-pago" onclick="seleccionarMetodo('oxxo')">
+            <div class="metodo-icon">🏪</div>
+            <div class="metodo-info">
+                <div class="metodo-nom">OXXO Pay (Digital Femsa)</div>
+                <div class="metodo-desc">Referencia + Código de Barras</div>
+            </div>
+            <span>›</span>
+        </div>
+        <div class="metodo-pago" onclick="seleccionarMetodo('transferencia')">
+            <div class="metodo-icon">🏦</div>
+            <div class="metodo-info">
+                <div class="metodo-nom">Transferencia SPEI</div>
+                <div class="metodo-desc">Cuenta: BCMRMXMMPYM</div>
+            </div>
+            <span>›</span>
+        </div>
+    </div>
+
+    <div id="papeleraDeposito" class="form-section oculto">
+        <div class="papelera">
+            <div class="papelera-header">
+                <div class="papelera-tit">ESCALADA FINANCIERA</div>
+                <div class="papelera-sub">COMPROBANTE DE DEPÓSITO</div>
+            </div>
+            
+            <div class="papelera-fila">
+                <span class="papelera-etq">Cuenta a depositar:</span>
+                <span class="papelera-val">BCMRMXMMPYM</span>
+            </div>
+            <div class="papelera-fila">
+                <span class="papelera-etq">Nombre del depositante:</span>
+                <span class="papelera-val" id="papeleraNombre">—</span>
+            </div>
+            <div class="papelera-fila">
+                <span class="papelera-etq">Método de pago:</span>
+                <span class="papelera-val" id="papeleraMetodo">—</span>
+            </div>
+            <div class="papelera-fila">
+                <span class="papelera-etq">Fecha y hora:</span>
+                <span class="papelera-val" id="papeleraFecha">—</span>
+            </div>
+            
+            <div class="papelera-destacado">
+                <div class="papelera-fila" style="border-bottom:none; padding:0;">
+                    <span class="papelera-etq" style="font-weight:600; font-size:16px;">MONTO A PAGAR:</span>
+                    <span class="papelera-val" id="papeleraMonto" style="font-size:18px; color:#2563EB;">—</span>
+                </div>
+            </div>
+            
+            <div class="papelera-codigo" id="papeleraReferencia">—</div>
+            <div class="papelera-imagen" id="codigoBarrasContenedor"></div>
+            
+            <div class="papelera-fila">
+                <span class="papelera-etq">Estado:</span>
+                <span class="papelera-val" style="color:green;">PENDIENTE DE CONFIRMACIÓN</span>
+            </div>
+            
+            <div class="papelera-pie">
+                ⚠️ Conserva este comprobante como respaldo de tu operación.<br>
+                El depósito se acreditará una vez confirmado el pago.<br>
+                Escalada Financiera · Cuenta: BCMRMXMMPYM
+            </div>
+        </div>
+        
+        <button class="btn-primario" style="background:#2563EB; color:#fff; margin-top:16px;" onclick="window.print()">🖨️ Imprimir Comprobante</button>
+        <button class="btn-secundario" onclick="copiarTodo()">📋 Copiar Datos</button>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <button class="nav-item activo" onclick="volverInicio()"><span>📈</span><span>Mercados</span></button>
+    <button class="nav-item" onclick="irDeposito()"><span>💰</span><span>Depositar</span></button>
+    <button class="nav-item"><span>💳</span><span>Retirar</span></button>
+    <button class="nav-item"><span>📊</span><span>Cuenta</span></button>
+</div>
+
+<script>
+let referenciaActual = "";
+
+function mostrarToast(mensaje, tipo="exito") {
+    const t = document.createElement("div");
+    t.className = "toast";
+    t.style.borderLeft = tipo==="exito"?"3px solid #00C48C":"3px solid #FF5252";
+    t.textContent = mensaje;
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(),3500);
+}
+
+function volverInicio() {
+    document.getElementById("pagDeposito").classList.add("oculto");
+    document.getElementById("pagInicio").classList.remove("oculto");
+}
+
+function irDeposito() {
+    document.getElementById("pagInicio").classList.add("oculto");
+    document.getElementById("pagDeposito").classList.remove("oculto");
+    document.getElementById("papeleraDeposito").classList.add("oculto");
+}
+
+async function seleccionarMetodo(metodo) {
+    const nombre = document.getElementById("nombreDepositante").value.trim();
+    const monto = document.getElementById("montoDep").value;
+    const email = document.getElementById("emailDepositante").value || "cliente@escaladafinanciera.com";
+    const telefono = document.getElementById("telefonoDepositante").value || "+525512345678";
+
+    if (!nombre) return mostrarToast("Ingresa el nombre de quien deposita","error");
+    if (!monto || parseFloat(monto) < 100) return mostrarToast("El monto mínimo es $100 MXN","error");
+
+    if (metodo === "oxxo") {
+        mostrarToast("🔄 Generando referencia OXXO...","info");
+        
+        try {
+            const res = await fetch("/api/crear-pago-oxxo", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    monto: parseFloat(monto),
+                    nombre_cliente: nombre,
+                    email, telefono
+                })
+            });
+
+            const datos = await res.json();
+            if (!datos.exito) throw new Error(datos.error || "Error desconocido");
+
+            document.getElementById("papeleraNombre").textContent = nombre;
+            document.getElementById("papeleraMetodo").textContent = "OXXO Pay — Digital Femsa";
+            document.getElementById("papeleraFecha").textContent = new Date().toLocaleString('es-MX');
+            document.getElementById("papeleraMonto").textContent = "$" + parseFloat(monto).toLocaleString('es-MX') + " MXN";
+            document.getElementById("papeleraReferencia").textContent = datos.referencia;
+            
+            const contenedor = document.getElementById("codigoBarrasContenedor");
+            contenedor.innerHTML = `
+                <p style="font-size:12px;color:#666;margin-bottom:8px;">📸 Código de Barras (escanea en caja OXXO)</p>
+                <img src="${datos.codigo_barras_url}" alt="Código de Barras OXXO" style="max-width:280px;border:1px solid #ccc;padding:8px;background:#fff;">
+                <p style="font-size:11px;color:#888;margin-top:8px;">Válido hasta: ${datos.expira}</p>
+            `;
+            
+            referenciaActual = datos.referencia;
+            document.getElementById("papeleraDeposito").classList.remove("oculto");
+            mostrarToast("✅ Referencia generada con éxito!","exito");
+
+        } catch (err) {
+            mostrarToast("❌ " + err.message,"error");
+        }
+
+    } else {
+        const fecha = new Date();
+        const fechaStr = fecha.toLocaleDateString('es-MX', {day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + 
+                         fecha.toLocaleTimeString('es-MX', {hour:'2-digit',minute:'2-digit'});
+        referenciaActual = "REF-" + fecha.getFullYear() + 
+                          (fecha.getMonth()+1).toString().padStart(2,'0') + 
+                          fecha.getDate().toString().padStart(2,'0') + "-" +
+                          Date.now().toString(36).toUpperCase();
+        
+        document.getElementById("papeleraNombre").textContent = nombre;
+        document.getElementById("papeleraMetodo").textContent = "Transferencia SPEI";
+        document.getElementById("papeleraFecha").textContent = fechaStr;
+        document.getElementById("papeleraMonto").textContent = "$" + parseFloat(monto).toLocaleString('es-MX') + " MXN";
+        document.getElementById("papeleraReferencia").textContent = referenciaActual;
+        document.getElementById("codigoBarrasContenedor").innerHTML = "";
+        
+        document.getElementById("papeleraDeposito").classList.remove("oculto");
+        mostrarToast("✅ Comprobante generado","exito");
+    }
+}
+
+function copiarTodo() {
+    const texto = `
+═══════════════════════════════════
+      ESCALADA FINANCIERA
+   COMPROBANTE DE DEPÓSITO
+═══════════════════════════════════
+
+Cuenta a depositar: BCMRMXMMPYM
+Nombre: ${document.getElementById("papeleraNombre").textContent}
+Método: ${document.getElementById("papeleraMetodo").textContent}
+Fecha: ${document.getElementById("papeleraFecha").textContent}
+
+MONTO: ${document.getElementById("papeleraMonto").textContent}
+
+REFERENCIA: ${referenciaActual}
+
+═══════════════════════════════════
+Conserva este comprobante
+Estado: PENDIENTE DE CONFIRMACIÓN
+═══════════════════════════════════
+    `.trim();
+    navigator.clipboard.writeText(texto).then(()=>mostrarToast("✅ Copiado al portapapeles","exito"));
+}
+</script>
+</body>
+</html>
+  `);
+});
+
+// ==============================================
+// 💰 ENDPOINT: Crear Pago OXXO — Digital Femsa
+// ==============================================
+app.post('/api/crear-pago-oxxo', async (req, res) => {
+  try {
+    const { monto, nombre_cliente, email, telefono } = req.body;
+
+    if (!monto || monto < 100) {
+      return res.status(400).json({ error: "El monto mínimo es $100 MXN", exito: false });
+    }
+    if (!nombre_cliente) {
+      return res.status(400).json({ error: "Nombre del cliente requerido", exito: false });
+    }
+
+    console.log("📤 Solicitando OXXO Pay:", { monto, nombre_cliente, email });
+
+    const respuesta = await fetch('https://api.digitalfemsa.io/orders', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/vnd.es.femsa-v2.0.0+json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${FEMSA_API_KEY}`
+      },
+      body: JSON.stringify({
+        currency: "MXN",
+        customer_info: {
+          name: nombre_cliente,
+          email: email || "cliente@escaladafinanciera.com",
+          phone: telefono || "+525512345678"
+        },
+        line_items: [{
+          name: "Depósito — Escalada Financiera",
+          unit_price: Math.round(monto * 100),
+          quantity: 1
+        }],
+        charges: [{
+          payment_method: {
+            type: "oxxo",
+            expires_at: Math.floor(Date.now() / 1000) + (3 * 24 * 60 * 60)
+          }
+        }]
+      })
+    });
+
+    const datos = await respuesta.json();
+
+    if (!respuesta.ok) {
+      console.error("❌ Error Femsa:", datos);
+      return res.status(400).json({ 
+        error: datos.message || "Error al crear el pago", 
+        exito: false 
+      });
+    }
+
+    const oxxo = datos.charges?.data?.[0]?.payment_method;
+    if (!oxxo) {
+      return res.status(500).json({ error: "No se recibió datos de OXXO", exito: false });
+    }
+
+    pagos.set(datos.id, {
+      referencia: oxxo.reference,
+      monto,
+      nombre: nombre_cliente,
+      estado: "pendiente",
+      creado: new Date()
+    });
+
+    console.log("✅ OXXO Pay creado:", oxxo.reference);
+
+    res.json({
+      exito: true,
+      orden_id: datos.id,
+      referencia: oxxo.reference,
+      codigo_barras_url: oxxo.barcode_url,
+      monto_total: monto,
+      expira: new Date(oxxo.expires_at * 1000).toLocaleDateString('es-MX', { dateStyle: 'full' })
+    });
+
+  } catch (error) {
+    console.error("❌ Error servidor:", error);
+    res.status(500).json({ error: error.message, exito: false });
+  }
+});
+
+// ==============================================
+// 🔔 WEBHOOK — Recibir confirmación de pago
+// ==============================================
+app.post('/api/webhook-femsa', (req, res) => {
+  const evento = req.body;
+  console.log("\n📩 Webhook recibido — Tipo:", evento.type);
+
+  if (evento.type === "order.paid") {
+    const orden = evento.data.object;
+    const referencia = orden.charges?.data?.[0]?.payment_method?.reference;
+    const monto = orden.line_items?.[0]?.unit_price / 100;
+
+    console.log("✅ ======================================");
+    console.log("✅ PAGO CONFIRMADO POR DIGITAL FEMSA!");
+    console.log("✅ Orden ID:", orden.id);
+    console.log("✅ Referencia OXXO:", referencia);
+    console.log("✅ Monto: $" + monto + " MXN");
+    console.log("✅ ======================================");
+
+    if (pagos.has(orden.id)) {
+      pagos.get(orden.id).estado = "pagado";
+      pagos.get(orden.id).fecha_pago = new Date();
+    }
+  }
+
+  res.status(200).send("OK");
+});
+
+// ==============================================
+// 🚀 INICIAR SERVIDOR
+// ==============================================
+app.listen(PORT, () => {
+  console.log(`
+╔══════════════════════════════════════════════╗
+║     🚀 ESCALADA FINANCIERA — LISTA ✅         ║
+╠══════════════════════════════════════════════╣
+║  Servidor corriendo en el puerto ${PORT}       ║
+╚══════════════════════════════════════════════╝
+  `);
+});
