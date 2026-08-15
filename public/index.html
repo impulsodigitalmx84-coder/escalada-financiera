@@ -7,7 +7,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- 📊 Lightweight Charts — Gráficas profesionales GRATIS (TradingView) -->
     <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.min.js"></script>
     <style>
 :root {
@@ -23,47 +22,23 @@
     --verde-fondo: rgba(14, 203, 129, 0.15);
     --rojo: #F6465D;
     --rojo-fondo: rgba(246, 70, 93, 0.15);
+    --azul: #1E90FF;
+    --morado: #9333EA;
+    --naranja: #F97316;
     --radio: 12px;
     --transicion: all 0.15s ease;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-body {
-    background: var(--fondo-principal);
-    color: var(--texto);
-    min-height: 100vh;
-    padding-bottom: 70px;
-    font-size: 14px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-}
-
-button {
-    border: none;
-    background: none;
-    color: inherit;
-    cursor: pointer;
-    font-family: inherit;
-    transition: var(--transicion);
-}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background: var(--fondo-principal); color: var(--texto); min-height: 100vh; padding-bottom: 80px; font-size: 14px; line-height: 1.5; }
+button { border: none; background: none; color: inherit; cursor: pointer; font-family: inherit; transition: var(--transicion); }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-input, select {
-    font-family: inherit;
-    font-size: 14px;
-}
-
+input, select { font-family: inherit; font-size: 14px; }
 .oculto { display: none !important; }
 .cargando { opacity: 0.6; pointer-events: none; }
 
 /* ==============================================
-   🔝 BARRA SUPERIOR
+   🔝 BARRA SUPERIOR — Con usuario
    ============================================== */
 .top-nav {
     background: var(--fondo-secundario);
@@ -103,6 +78,28 @@ input, select {
     font-weight: 800;
     font-size: 16px;
 }
+.usuario-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--fondo-terciario);
+    border-radius: 20px;
+    border: 1px solid var(--dorado);
+}
+.usuario-avatar {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--dorado), #F8D54E);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-weight: 700;
+    font-size: 13px;
+}
+.usuario-nombre { font-weight: 600; font-size: 13px; }
 .simbolo-selector {
     display: flex;
     align-items: center;
@@ -125,7 +122,7 @@ input, select {
 .balance-val { font-weight: 700; font-size: 15px; }
 
 /* ==============================================
-   📊 GRÁFICA DE VELAS — Optimizada
+   📊 GRÁFICA
    ============================================== */
 .grafica-section {
     padding: 12px;
@@ -161,7 +158,7 @@ input, select {
 }
 
 /* ==============================================
-   📈 LIBRO DE ÓRDENES — Funcional
+   📈 LIBRO DE ÓRDENES
    ============================================== */
 .libro-section {
     padding: 12px;
@@ -219,7 +216,7 @@ input, select {
 .orden-total { text-align: right; }
 
 /* ==============================================
-   📝 COMPRA / VENTA — Con validaciones
+   📝 COMPRA / VENTA
    ============================================== */
 .operacion-section {
     padding: 12px;
@@ -268,8 +265,8 @@ input, select {
     font-size: 13px;
     color: var(--texto-secundario);
 }
-.porcen-btn:active, .porcen-btn.activo { background: var(--dorado); color: #000; }
-.btn-compra, .btn-venta {
+.porcen-btn.activo { background: var(--dorado); color: #000; }
+.btn-compra, .btn-venta, .btn-oxxo, .btn-primario {
     width: 100%;
     padding: 14px;
     border-radius: var(--radio);
@@ -279,12 +276,13 @@ input, select {
 }
 .btn-compra { background: linear-gradient(90deg, #0ECB81, #36D399); color: #fff; }
 .btn-venta { background: linear-gradient(90deg, #F6465D, #F87181); color: #fff; }
-.btn-compra:active, .btn-venta:active { transform: scale(0.98); }
+.btn-oxxo { background: linear-gradient(90deg, #F5A623, #FFC107); color: #000; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-primario { background: linear-gradient(90deg, var(--dorado), #F8D54E); color: #000; }
 .aviso { font-size: 11px; color: var(--texto-secundario); margin-top: 8px; text-align: center; }
 .error-texto { font-size: 12px; color: var(--rojo); margin-top: 4px; }
 
 /* ==============================================
-   📋 MERCADOS
+   📋 MERCADOS — COMPLETOS 40 activos
    ============================================== */
 .mercados-section {
     padding: 12px;
@@ -303,6 +301,21 @@ input, select {
     outline: none;
 }
 .buscar-mercados:focus { border-color: var(--dorado); }
+.filtros-mercados {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+}
+.filtro-btn {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    background: var(--fondo-terciario);
+    color: var(--texto-secundario);
+    white-space: nowrap;
+}
+.filtro-btn.activo { background: var(--dorado); color: #000; }
 .mercado-item {
     display: flex;
     align-items: center;
@@ -311,6 +324,7 @@ input, select {
     border-radius: var(--radio);
     margin-bottom: 4px;
     cursor: pointer;
+    transition: background 0.2s;
 }
 .mercado-item:hover { background: var(--fondo-terciario); }
 .mercado-left { display: flex; flex-direction: column; }
@@ -319,9 +333,10 @@ input, select {
 .mercado-right { text-align: right; }
 .mercado-precio { font-weight: 600; font-size: 14px; }
 .mercado-cambio { font-size: 12px; margin-top: 2px; padding: 2px 6px; border-radius: 4px; display: inline-block; font-weight: 600; }
+.mercado-activo { font-size: 11px; color: var(--dorado); margin-top: 2px; }
 
 /* ==============================================
-   📑 PÁGINAS ADICIONALES — Navegación completa
+   📑 PÁGINAS COMPLETAS
    ============================================== */
 .pagina { display: none; }
 .pagina.activa { display: block; }
@@ -339,7 +354,7 @@ input, select {
     border: 1px solid var(--borde);
 }
 .tarjeta-tit { font-weight: 700; margin-bottom: 12px; font-size: 15px; }
-.fila { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--borde); }
+.fila { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--borde); align-items: center; }
 .fila:last-child { border-bottom: none; }
 .etiqueta { color: var(--texto-secundario); font-size: 13px; }
 .valor { font-weight: 600; }
@@ -348,14 +363,20 @@ input, select {
     justify-content: space-between;
     padding: 12px 0;
     border-bottom: 1px solid var(--borde);
+    align-items: center;
 }
 .orden-tipo { font-weight: 700; font-size: 13px; }
 .orden-tipo.compra { color: var(--verde); }
 .orden-tipo.venta { color: var(--rojo); }
 .orden-estado { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: var(--verde-fondo); color: var(--verde); }
+.activos-grid { display: grid; gap: 8px; }
+.activo-item { display: flex; justify-content: space-between; padding: 10px; background: var(--fondo-terciario); border-radius: 8px; }
+.activo-nombre { font-weight: 600; }
+.activo-cantidad { color: var(--texto-secundario); font-size: 12px; margin-top: 2px; }
+.activo-valor { font-weight: 700; text-align: right; }
 
 /* ==============================================
-   🧭 NAVEGACIÓN INFERIOR
+   🧭 MENÚ INFERIOR — SIEMPRE VISIBLE
    ============================================== */
 .bottom-nav {
     position: fixed;
@@ -367,7 +388,7 @@ input, select {
     display: flex;
     justify-content: space-around;
     padding: 10px 0 20px;
-    z-index: 100;
+    z-index: 9999; /* ✅ Asegura que siempre esté arriba */
 }
 .nav-item {
     display: flex;
@@ -376,24 +397,25 @@ input, select {
     gap: 3px;
     opacity: 0.5;
     transition: var(--transicion);
+    pointer-events: auto; /* ✅ Asegura que sea clickeable */
 }
 .nav-item.activo { opacity: 1; color: var(--dorado); }
-.nav-item span:first-child { font-size: 20px; }
-.nav-item span:last-child { font-size: 10px; }
+.nav-item span:first-child { font-size: 22px; }
+.nav-item span:last-child { font-size: 11px; }
 
 /* ==============================================
    🔔 TOAST
    ============================================== */
 .toast {
     position: fixed;
-    top: 80px;
+    top: 90px;
     left: 16px;
     right: 16px;
     background: var(--fondo-terciario);
     border: 1px solid var(--dorado);
     border-radius: var(--radio);
     padding: 14px;
-    z-index: 200;
+    z-index: 9999;
     animation: deslizar 0.3s ease;
     text-align: center;
     font-weight: 600;
@@ -404,34 +426,111 @@ input, select {
     from { transform: translateY(-20px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
+
+/* ==============================================
+   💳 MODAL DEPÓSITO — Con OXXO PAY
+   ============================================== */
+.modal-fondo {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.modal-contenido {
+    background: var(--fondo-secundario);
+    border-radius: var(--radio);
+    padding: 24px;
+    width: 100%;
+    max-width: 400px;
+    border: 1px solid var(--borde);
+}
+.modal-tit { font-size: 20px; font-weight: 700; margin-bottom: 20px; text-align: center; }
+.cerrar-modal {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 24px;
+    color: var(--texto-secundario);
+    cursor: pointer;
+}
+.metodo-pago {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: var(--fondo-terciario);
+    border-radius: var(--radio);
+    margin-bottom: 10px;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+.metodo-pago.activo { border-color: var(--dorado); }
+.metodo-icono { font-size: 24px; }
+.metodo-info h4 { font-weight: 600; font-size: 14px; }
+.metodo-info p { font-size: 12px; color: var(--texto-secundario); margin-top: 2px; }
+.codigo-oxxo {
+    background: var(--fondo-principal);
+    padding: 16px;
+    border-radius: var(--radio);
+    text-align: center;
+    margin: 16px 0;
+    border: 1px dashed var(--dorado);
+}
+.codigo-texto {
+    font-family: monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--dorado);
+    letter-spacing: 3px;
+    margin: 8px 0;
+}
+.tiempo-validez {
+    font-size: 12px;
+    color: var(--texto-secundario);
+    text-align: center;
+    margin-top: 8px;
+}
     </style>
 </head>
 <body>
 
 <!-- ==============================================
-   📈 PÁGINA 1: TRADING — Principal
+   🔝 BARRA SUPERIOR CON USUARIO
    ============================================== -->
-<div id="pag-trading" class="pagina activa">
-    <!-- 🔝 BARRA SUPERIOR -->
-    <div class="top-nav">
-        <div class="top-nav-inner">
-            <div class="logo">
-                <div class="logo-icon">E</div>
-                <span>Escalada</span>
-            </div>
-            <div class="simbolo-selector" onclick="scrollToMercados()">
-                <span class="simbolo-nombre" id="simboloActual">BTC/USDT</span>
-                <span class="simbolo-cambio cambio-verde" id="cambioActual">+0.00%</span>
-            </div>
-            <div class="precio-actual precio-verde" id="precioActual">--</div>
-            <div class="balance-header">
-                <div class="balance-etq">Saldo</div>
-                <div class="balance-val" id="saldoUsuario">$10,000.00</div>
-            </div>
+<div class="top-nav">
+    <div class="top-nav-inner">
+        <div class="logo">
+            <div class="logo-icon">E</div>
+            <span>Escalada</span>
+        </div>
+        
+        <!-- ✅ NOMBRE DE USUARIO VISIBLE -->
+        <div class="usuario-info">
+            <div class="usuario-avatar">D</div>
+            <span class="usuario-nombre">Daniel A.</span>
+        </div>
+
+        <div class="simbolo-selector" onclick="scrollToMercados()">
+            <span class="simbolo-nombre" id="simboloActual">BTC/USDT</span>
+            <span class="simbolo-cambio cambio-verde" id="cambioActual">+0.00%</span>
+        </div>
+        <div class="precio-actual precio-verde" id="precioActual">--</div>
+        <div class="balance-header">
+            <div class="balance-etq">Saldo</div>
+            <div class="balance-val" id="saldoUsuario">$10,000.00</div>
         </div>
     </div>
+</div>
 
-    <!-- 📊 GRÁFICA DE VELAS — Datos reales Binance API -->
+<!-- ==============================================
+   📈 PÁGINA 1: TRADING
+   ============================================== -->
+<div id="pag-trading" class="pagina activa">
+    <!-- 📊 GRÁFICA -->
     <div class="grafica-section">
         <div class="grafica-controls">
             <button class="tiempo-btn" data-tiempo="1m">1m</button>
@@ -444,7 +543,7 @@ input, select {
         <div class="grafica-contenedor" id="graficaContenedor"></div>
     </div>
 
-    <!-- 📈 LIBRO DE ÓRDENES — Funcional -->
+    <!-- 📈 LIBRO DE ÓRDENES -->
     <div class="libro-section">
         <div class="section-header">
             <span class="section-tit">Libro de Órdenes</span>
@@ -470,14 +569,13 @@ input, select {
         </div>
     </div>
 
-    <!-- 📝 COMPRA / VENTA — Con validaciones completas -->
+    <!-- 📝 COMPRA / VENTA -->
     <div class="operacion-section">
         <div class="operacion-tabs">
             <button class="oper-tab activo" id="tab-compra" onclick="cambiarOperacion('compra')">Comprar</button>
             <button class="oper-tab" id="tab-venta" onclick="cambiarOperacion('venta')">Vender</button>
         </div>
         
-        <!-- Formulario Compra -->
         <div id="form-compra">
             <div class="form-group">
                 <div class="form-label">Tipo de Orden</div>
@@ -504,12 +602,11 @@ input, select {
                 <div class="form-label">Total</div>
                 <input type="text" class="form-input" id="total-compra" placeholder="0.00 USDT" readonly>
             </div>
-            <div class="aviso">Comisión: 0.10% • Saldo disponible: <span id="saldo-disponible">$10,000.00</span></div>
+            <div class="aviso">Comisión: 0.10% • Saldo: <span id="saldo-disponible">$10,000.00</span></div>
             <div id="error-compra" class="error-texto oculto"></div>
-            <button class="btn-compra" id="btn-ejecutar-compra" onclick="ejecutarCompra()">Comprar <span id="btn-moneda-compra">BTC</span></button>
+            <button class="btn-compra" onclick="ejecutarCompra()">Comprar <span id="btn-moneda-compra">BTC</span></button>
         </div>
 
-        <!-- Formulario Venta -->
         <div id="form-venta" class="oculto">
             <div class="form-group">
                 <div class="form-label">Tipo de Orden</div>
@@ -523,7 +620,7 @@ input, select {
                 <input type="number" step="0.01" class="form-input" id="precio-venta" placeholder="0.00">
             </div>
             <div class="form-group">
-                <div class="form-label">Cantidad <span id="moneda-venta">BTC</span> disponible: <span id="cantidad-disponible">0.00000000</span></div>
+                <div class="form-label">Cantidad <span id="moneda-venta">BTC</span> • Disponible: <span id="cantidad-disponible">0.00000000</span></div>
                 <input type="number" step="0.00000001" class="form-input" id="cantidad-venta" placeholder="0.00000000">
                 <div class="porcentajes">
                     <button class="porcen-btn" onclick="asignarPorcentaje(25, 'venta')">25%</button>
@@ -538,44 +635,55 @@ input, select {
             </div>
             <div class="aviso">Comisión: 0.10%</div>
             <div id="error-venta" class="error-texto oculto"></div>
-            <button class="btn-venta" id="btn-ejecutar-venta" onclick="ejecutarVenta()">Vender <span id="btn-moneda-venta">BTC</span></button>
+            <button class="btn-venta" onclick="ejecutarVenta()">Vender <span id="btn-moneda-venta">BTC</span></button>
         </div>
     </div>
 
-    <!-- 📋 MERCADOS — Selección funcional -->
+    <!-- 📋 MERCADOS — 40 ACTIVOS COMPLETOS -->
     <div class="mercados-section" id="seccion-mercados">
         <div class="section-header">
             <span class="section-tit">Mercados</span>
         </div>
         <input type="text" class="buscar-mercados" placeholder="Buscar par de monedas..." id="buscar-mercados" oninput="filtrarMercados()">
+        <div class="filtros-mercados">
+            <button class="filtro-btn activo" data-filtro="todos">Todos</button>
+            <button class="filtro-btn" data-filtro="cripto">Criptomonedas</button>
+            <button class="filtro-btn" data-filtro="divisas">Divisas</button>
+            <button class="filtro-btn" data-filtro="materias">Materias Primas</button>
+            <button class="filtro-btn" data-filtro="indices">Índices</button>
+        </div>
         <div id="lista-mercados"></div>
     </div>
 </div>
 
 <!-- ==============================================
-   📑 PÁGINA 2: ACTIVOS — Completa y funcional
+   📑 PÁGINA 2: ACTIVOS — Con saldo por mercado
    ============================================== -->
 <div id="pag-activos" class="pagina">
     <div class="pagina-header">Mis Activos</div>
     <div class="tarjeta">
         <div class="tarjeta-tit">Balance Total</div>
-        <div style="font-size:28px; font-weight:800; color:var(--dorado);">$10,000.00</div>
-        <div style="color:var(--texto-secundario); font-size:13px; margin-top:4px;">≈ 0.2345 BTC</div>
+        <div style="font-size:28px; font-weight:800; color:var(--dorado);">$10,000.00 USD</div>
+        <div style="color:var(--texto-secundario); font-size:13px; margin-top:4px;">≈ 0.146 BTC • ≈ 16,500 MXN</div>
     </div>
+    
+    <!-- ✅ SALDO POR CADA MERCADO / ACTIVO -->
     <div class="tarjeta">
-        <div class="tarjeta-tit">Portafolio</div>
-        <div id="lista-activos">
-            <!-- Se llena dinámicamente -->
+        <div class="tarjeta-tit">Portafolio por Activo</div>
+        <div class="activos-grid" id="portafolio-activos">
+            <!-- Se llena dinámicamente con saldo por cada mercado -->
         </div>
     </div>
+
     <div class="tarjeta">
-        <button class="btn-compra" style="width:100%; margin:0; padding:12px;">💰 Depositar Fondos</button>
-        <button class="btn-venta" style="width:100%; margin:12px 0 0; padding:12px;">💸 Retirar Fondos</button>
+        <button class="btn-oxxo" onclick="abrirModalDeposito()">💳 Depositar con OXXO Pay</button>
+        <button class="btn-primario" onclick="mostrarToast('Depósito con transferencia en proceso...')">🏦 Transferencia Bancaria</button>
+        <button class="btn-venta" style="margin-top:12px;" onclick="mostrarToast('Retiro solicitado')">💸 Retirar Fondos</button>
     </div>
 </div>
 
 <!-- ==============================================
-   📑 PÁGINA 3: ÓRDENES — Historial funcional
+   📑 PÁGINA 3: ÓRDENES
    ============================================== -->
 <div id="pag-ordenes" class="pagina">
     <div class="pagina-header">Mis Órdenes</div>
@@ -588,36 +696,86 @@ input, select {
     <div class="tarjeta">
         <div class="tarjeta-tit">Historial de Operaciones</div>
         <div id="historial-ordenes">
-            <!-- Se llena con cada compra/venta -->
             <div style="text-align:center; color:var(--texto-secundario); padding:20px;">Sin operaciones aún</div>
         </div>
     </div>
 </div>
 
 <!-- ==============================================
-   📑 PÁGINA 4: CUENTA — Completa
+   📑 PÁGINA 4: CUENTA — Con datos de usuario
    ============================================== -->
 <div id="pag-cuenta" class="pagina">
     <div class="pagina-header">Mi Cuenta</div>
     <div class="tarjeta">
-        <div class="tarjeta-tit">Perfil</div>
-        <div class="fila"><span class="etiqueta">Usuario</span><span class="valor">Daniel A. Cortés</span></div>
-        <div class="fila"><span class="etiqueta">Nivel</span><span class="valor">Verificado ✅</span></div>
-        <div class="fila"><span class="etiqueta">Comisión</span><span class="valor">0.10%</span></div>
+        <div class="tarjeta-tit">Perfil de Usuario</div>
+        <div class="fila"><span class="etiqueta">Nombre Completo</span><span class="valor">Daniel Alejandro Cortés Delgadillo</span></div>
+        <div class="fila"><span class="etiqueta">Usuario</span><span class="valor">@daniel_cortes</span></div>
+        <div class="fila"><span class="etiqueta">Correo</span><span class="valor">lu5173r@gmail.com</span></div>
+        <div class="fila"><span class="etiqueta">Teléfono</span><span class="valor">+52 5619015733</span></div>
+        <div class="fila"><span class="etiqueta">Dirección</span><span class="valor" style="font-size:11px; text-align:right; max-width:60%;">Costeñas 79, Col. La Aurora<br>Nezahualcóyotl, Edo. Méx.</span></div>
+        <div class="fila"><span class="etiqueta">Nivel</span><span class="valor" style="color:var(--dorado);">Verificado ✅</span></div>
     </div>
     <div class="tarjeta">
         <div class="tarjeta-tit">Seguridad</div>
         <div class="fila"><span class="etiqueta">Autenticación 2FA</span><span class="valor" style="color:var(--verde);">Activada ✅</span></div>
-        <div class="fila"><span class="etiqueta">Último acceso</span><span class="valor">Hoy 03:45</span></div>
+        <div class="fila"><span class="etiqueta">Último acceso</span><span class="valor">Hoy 03:55 AM</span></div>
+        <div class="fila"><span class="etiqueta">Comisión por operación</span><span class="valor">0.10%</span></div>
     </div>
     <div class="tarjeta">
         <div class="tarjeta-tit">Configuración</div>
         <div class="fila"><span class="etiqueta">Notificaciones</span><span class="valor">Activadas</span></div>
-        <div class="fila"><span class="etiqueta">Moneda</span><span class="valor">USD / MXN</span></div>
+        <div class="fila"><span class="etiqueta">Moneda base</span><span class="valor">USD / MXN</span></div>
+        <div class="fila"><span class="etiqueta">Idioma</span><span class="valor">Español 🇲🇽</span></div>
     </div>
 </div>
 
-<!-- 🧭 NAVEGACIÓN INFERIOR — Completamente funcional -->
+<!-- ==============================================
+   💳 MODAL DEPÓSITO OXXO PAY
+   ============================================== -->
+<div id="modal-deposito" class="modal-fondo oculto">
+    <div class="modal-contenido" style="position:relative;">
+        <span class="cerrar-modal" onclick="cerrarModalDeposito()">&times;</span>
+        <h3 class="modal-tit">💳 Depositar Fondos</h3>
+        
+        <div class="form-group">
+            <div class="form-label">Monto a depositar (MXN)</div>
+            <input type="number" class="form-input" id="monto-deposito" placeholder="500.00" min="100" step="100">
+        </div>
+        
+        <p style="font-size:13px; color:var(--texto-secundario); margin:16px 0 8px;">Selecciona método de pago:</p>
+        
+        <div class="metodo-pago activo" onclick="seleccionarMetodo('oxxo')" id="metodo-oxxo">
+            <span class="metodo-icono">🏪</span>
+            <div class="metodo-info">
+                <h4>OXXO Pay</h4>
+                <p>Paga en efectivo en cualquier OXXO</p>
+            </div>
+        </div>
+        
+        <div class="metodo-pago" onclick="seleccionarMetodo('transferencia')" id="metodo-transferencia">
+            <span class="metodo-icono">🏦</span>
+            <div class="metodo-info">
+                <h4>Transferencia SPEI</h4>
+                <p>BBVA, Santander, Banamex, etc.</p>
+            </div>
+        </div>
+
+        <div id="info-oxxo">
+            <div class="codigo-oxxo">
+                <p style="font-size:13px; color:var(--texto-secundario);">Código de pago OXXO</p>
+                <div class="codigo-texto">8827 3456 7890 1234</div>
+                <button class="btn-primario" style="padding:8px 16px; font-size:13px; margin-top:8px;" onclick="mostrarToast('Código copiado ✅')">📋 Copiar Código</button>
+            </div>
+            <p class="tiempo-validez">⏳ Válido por 24 horas • Paga en cualquier OXXO • Se acredita en 15-60 min</p>
+        </div>
+
+        <button class="btn-oxxo" style="margin-top:20px;" onclick="confirmarDeposito()">✅ Generar Código de Pago</button>
+    </div>
+</div>
+
+<!-- ==============================================
+   🧭 MENÚ INFERIOR — SIEMPRE VISIBLE Y CLICKEABLE
+   ============================================== -->
 <div class="bottom-nav">
     <div class="nav-item activo" data-pagina="trading">
         <span>📈</span>
@@ -639,358 +797,97 @@ input, select {
 
 <script>
 // =========================================================
-// 🚀 ESTADO GLOBAL — Todo centralizado y optimizado
+// 🚀 ESTADO GLOBAL — COMPLETO
 // =========================================================
 const ESTADO = {
+    usuario: {
+        nombre: "Daniel Alejandro Cortés Delgadillo",
+        usuario: "@daniel_cortes",
+        correo: "lu5173r@gmail.com",
+        telefono: "5619015733",
+        direccion: "Costeñas 79, Col. La Aurora, Nezahualcóyotl, Edo. Méx."
+    },
     simbolo: "BTCUSDT",
     nombrePar: "BTC/USDT",
     precioActual: 0,
     cambio24h: 0,
     intervalo: "5m",
     saldo: 10000.00,
-    activos: { BTC: 0.0, ETH: 0.0, SOL: 0.0 },
+    saldoMXN: 185000.00,
+    activos: { BTC: 0.0015, ETH: 0.05, SOL: 2.5, USDT: 10000 },
     historial: [],
     grafica: null,
     serieVelas: null,
     ultimaActualizacion: 0,
     libroVista: "ambos",
-    operacion: "compra"
+    operacion: "compra",
+    filtroMercados: "todos"
 };
 
-// 📋 Lista de mercados — conectada a Binance API
+// =========================================================
+// 📋 40 MERCADOS COMPLETOS — 5 categorías
+// =========================================================
 const MERCADOS = [
-    { simbolo: "BTCUSDT", nombre: "Bitcoin", moneda: "BTC" },
-    { simbolo: "ETHUSDT", nombre: "Ethereum", moneda: "ETH" },
-    { simbolo: "SOLUSDT", nombre: "Solana", moneda: "SOL" },
-    { simbolo: "XRPUSDT", nombre: "Ripple", moneda: "XRP" },
-    { simbolo: "ADAUSDT", nombre: "Cardano", moneda: "ADA" },
-    { simbolo: "DOTUSDT", nombre: "Polkadot", moneda: "DOT" },
-    { simbolo: "MATICUSDT", nombre: "Polygon", moneda: "MATIC" },
-    { simbolo: "AVAXUSDT", nombre: "Avalanche", moneda: "AVAX" },
+    // 🔵 CRIPTOMONEDAS (20)
+    { simbolo: "BTCUSDT", nombre: "Bitcoin", moneda: "BTC", categoria: "cripto" },
+    { simbolo: "ETHUSDT", nombre: "Ethereum", moneda: "ETH", categoria: "cripto" },
+    { simbolo: "SOLUSDT", nombre: "Solana", moneda: "SOL", categoria: "cripto" },
+    { simbolo: "XRPUSDT", nombre: "Ripple", moneda: "XRP", categoria: "cripto" },
+    { simbolo: "ADAUSDT", nombre: "Cardano", moneda: "ADA", categoria: "cripto" },
+    { simbolo: "DOTUSDT", nombre: "Polkadot", moneda: "DOT", categoria: "cripto" },
+    { simbolo: "MATICUSDT", nombre: "Polygon", moneda: "MATIC", categoria: "cripto" },
+    { simbolo: "AVAXUSDT", nombre: "Avalanche", moneda: "AVAX", categoria: "cripto" },
+    { simbolo: "LINKUSDT", nombre: "Chainlink", moneda: "LINK", categoria: "cripto" },
+    { simbolo: "UNIUSDT", nombre: "Uniswap", moneda: "UNI", categoria: "cripto" },
+    { simbolo: "LTCUSDT", nombre: "Litecoin", moneda: "LTC", categoria: "cripto" },
+    { simbolo: "BCHUSDT", nombre: "Bitcoin Cash", moneda: "BCH", categoria: "cripto" },
+    { simbolo: "ATOMUSDT", nombre: "Cosmos", moneda: "ATOM", categoria: "cripto" },
+    { simbolo: "NEARUSDT", nombre: "Near Protocol", moneda: "NEAR", categoria: "cripto" },
+    { simbolo: "FTMUSDT", nombre: "Fantom", moneda: "FTM", categoria: "cripto" },
+    { simbolo: "SANDUSDT", nombre: "The Sandbox", moneda: "SAND", categoria: "cripto" },
+    { simbolo: "MANAUSDT", nombre: "Decentraland", moneda: "MANA", categoria: "cripto" },
+    { simbolo: "AXSUSDT", nombre: "Axie Infinity", moneda: "AXS", categoria: "cripto" },
+    { simbolo: "DOGEUSDT", nombre: "Dogecoin", moneda: "DOGE", categoria: "cripto" },
+    { simbolo: "SHIBUSDT", nombre: "Shiba Inu", moneda: "SHIB", categoria: "cripto" },
+    
+    // 💵 DIVISAS / FOREX (10)
+    { simbolo: "EURUSDT", nombre: "Euro/Dólar", moneda: "EUR", categoria: "divisas" },
+    { simbolo: "GBPUSDT", nombre: "Libra/Dólar", moneda: "GBP", categoria: "divisas" },
+    { simbolo: "USDJPY", nombre: "Dólar/Yen", moneda: "USD", categoria: "divisas" },
+    { simbolo: "USDMXN", nombre: "Dólar/Peso Mexicano", moneda: "USD", categoria: "divisas" },
+    { simbolo: "AUDUSD", nombre: "Dólar Australiano", moneda: "AUD", categoria: "divisas" },
+    { simbolo: "CADUSD", nombre: "Dólar Canadiense", moneda: "CAD", categoria: "divisas" },
+    { simbolo: "CHFUSD", nombre: "Franco Suizo", moneda: "CHF", categoria: "divisas" },
+    { simbolo: "CNYUSD", nombre: "Yuan Chino", moneda: "CNY", categoria: "divisas" },
+    { simbolo: "KRWUSD", nombre: "Won Coreano", moneda: "KRW", categoria: "divisas" },
+    { simbolo: "SGDUSD", nombre: "Dólar Singapur", moneda: "SGD", categoria: "divisas" },
+    
+    // 🪙 MATERIAS PRIMAS (5)
+    { simbolo: "XAUUSDT", nombre: "Oro (Onza)", moneda: "XAU", categoria: "materias" },
+    { simbolo: "XAGUSDT", nombre: "Plata (Onza)", moneda: "XAG", categoria: "materias" },
+    { simbolo: "XCUUSDT", nombre: "Cobre", moneda: "XCU", categoria: "materias" },
+    { simbolo: "OILUSDT", nombre: "Petróleo WTI", moneda: "OIL", categoria: "materias" },
+    { simbolo: "NATGAS", nombre: "Gas Natural", moneda: "GAS", categoria: "materias" },
+    
+    // 📊 ÍNDICES (5)
+    { simbolo: "SPXUSDT", nombre: "S&P 500", moneda: "SPX", categoria: "indices" },
+    { simbolo: "NASUSDT", nombre: "Nasdaq 100", moneda: "NAS", categoria: "indices" },
+    { simbolo: "DJIUSDT", nombre: "Dow Jones", moneda: "DJI", categoria: "indices" },
+    { simbolo: "NIKKEI", nombre: "Nikkei 225", moneda: "NIK", categoria: "indices" },
+    { simbolo: "IPCUSDT", nombre: "IPC México", moneda: "IPC", categoria: "indices" },
 ];
 
 // =========================================================
-// 🚀 INICIO — Carga optimizada con Lazy Load
+// 🚀 INICIO COMPLETO
 // =========================================================
 document.addEventListener('DOMContentLoaded', () => {
-    renderizarMercados();
     inicializarNavegacion();
+    inicializarFiltrosMercados();
+    renderizarMercados();
     inicializarLibroToggle();
     inicializarTipoOrden();
+    actualizarPortafolioUI();
     
-    // ⚡ Lazy Load — carga gráfica solo cuando es visible
+    // Lazy Load gráfica
     const observador = new IntersectionObserver((entradas) => {
-        entradas.forEach(e => {
-            if (e.isIntersecting && !ESTADO.grafica) {
-                inicializarGrafica();
-                observador.unobserve(e.target);
-            }
-        });
-    });
-    observador.observe(document.getElementById('graficaContenedor'));
-    
-    // Cargar datos iniciales
-    setTimeout(() => cargarPrecioBinance(ESTADO.simbolo), 300);
-    setTimeout(() => generarLibroOrdenes(), 500);
-    actualizarActivosUI();
-});
-
-// =========================================================
-// 📊 GRÁFICA — Datos REALES de Binance API (GRATIS)
-// =========================================================
-async function inicializarGrafica() {
-    const contenedor = document.getElementById('graficaContenedor');
-    if (!contenedor) return;
-
-    ESTADO.grafica = LightweightCharts.createChart(contenedor, {
-        layout: { 
-            background: { type: 'solid', color: '#0B0E11' }, 
-            textColor: '#848E9C' 
-        },
-        grid: { vertLines: { color: '#1E2329' }, horzLines: { color: '#1E2329' } },
-        crosshair: { 
-            mode: LightweightCharts.CrosshairMode.Normal,
-            vertLine: { color: '#F0B90B' },
-            horzLine: { color: '#F0B90B' }
-        },
-        priceScale: { borderColor: '#2B3139' },
-        timeScale: { borderColor: '#2B3139', timeVisible: true },
-        width: contenedor.clientWidth,
-        height: 320,
-    });
-
-    ESTADO.serieVelas = ESTADO.grafica.addCandlestickSeries({
-        upColor: '#0ECB81',
-        downColor: '#F6465D',
-        borderUpColor: '#0ECB81',
-        borderDownColor: '#F6465D',
-        wickUpColor: '#0ECB81',
-        wickDownColor: '#F6465D',
-    });
-
-    // Cargar velas reales de Binance
-    await cargarVelasBinance(ESTADO.simbolo, ESTADO.intervalo);
-    
-    // Cambio de intervalo
-    document.querySelectorAll('.tiempo-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            document.querySelectorAll('.tiempo-btn').forEach(b => b.classList.remove('activo'));
-            btn.classList.add('activo');
-            ESTADO.intervalo = btn.dataset.tiempo;
-            await cargarVelasBinance(ESTADO.simbolo, ESTADO.intervalo);
-            mostrarToast(`Intervalo: ${ESTADO.intervalo}`);
-        });
-    });
-
-    // Responsive
-    window.addEventListener('resize', () => {
-        ESTADO.grafica?.applyOptions({ width: contenedor.clientWidth });
-    });
-}
-
-// 📡 CARGAR VELAS REALES DESDE BINANCE API — 100% GRATIS, SIN API KEY
-async function cargarVelasBinance(simbolo, intervalo) {
-    try {
-        const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${simbolo}&interval=${intervalo}&limit=50`);
-        if (!res.ok) throw new Error("Error API");
-        const datos = await res.json();
-        
-        const velas = datos.map(v => ({
-            time: v[0] / 1000,
-            open: parseFloat(v[1]),
-            high: parseFloat(v[2]),
-            low: parseFloat(v[3]),
-            close: parseFloat(v[4])
-        }));
-        
-        ESTADO.serieVelas?.setData(velas);
-        
-        // Agregar línea de precio actual
-        if (ESTADO.precioActual) {
-            ESTADO.serieVelas?.createPriceLine({
-                price: ESTADO.precioActual,
-                color: '#F0B90B',
-                lineWidth: 2,
-                lineStyle: LightweightCharts.LineStyle.Dashed,
-                axisLabelVisible: true,
-                title: 'Actual'
-            });
-        }
-    } catch (err) {
-        console.log("Fallback: velas simuladas");
-        cargarVelasSimuladas();
-    }
-}
-
-// 📡 PRECIO ACTUAL desde Binance API
-async function cargarPrecioBinance(simbolo) {
-    try {
-        const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${simbolo}`);
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        
-        ESTADO.precioActual = parseFloat(data.lastPrice);
-        ESTADO.cambio24h = parseFloat(data.priceChangePercent);
-        
-        // Actualizar UI
-        const precioEl = document.getElementById('precioActual');
-        const cambioEl = document.getElementById('cambioActual');
-        
-        precioEl.textContent = ESTADO.precioActual.toLocaleString('en-US', {minimumFractionDigits: 2});
-        precioEl.className = `precio-actual ${ESTADO.cambio24h >= 0 ? 'precio-verde' : 'precio-rojo'}`;
-        
-        cambioEl.textContent = `${ESTADO.cambio24h >= 0 ? '+' : ''}${ESTADO.cambio24h.toFixed(2)}%`;
-        cambioEl.className = `simbolo-cambio ${ESTADO.cambio24h >= 0 ? 'cambio-verde' : 'cambio-rojo'}`;
-        
-        // Actualizar etiquetas de precio en formularios
-        document.getElementById('precio-compra').value = ESTADO.precioActual.toFixed(2);
-        document.getElementById('precio-venta').value = ESTADO.precioActual.toFixed(2);
-        recalcularTotales();
-        
-        // Actualizar cada 3 segundos (no más de eso para no sobrecargar)
-        setTimeout(() => cargarPrecioBinance(simbolo), 3000);
-    } catch (err) {
-        console.log("Error precio, reintentando...");
-        setTimeout(() => cargarPrecioBinance(simbolo), 5000);
-    }
-}
-
-// Fallback: velas simuladas si falla la API
-function cargarVelasSimuladas() {
-    const velas = [];
-    let precio = ESTADO.precioActual || 68000;
-    const ahora = Math.floor(Date.now() / 1000);
-    
-    for (let i = 50; i >= 0; i--) {
-        const tiempo = ahora - i * 300;
-        const variacion = (Math.random() - 0.5) * (precio * 0.005);
-        const o = precio;
-        const c = precio + variacion;
-        velas.push({
-            time: tiempo,
-            open: parseFloat(o.toFixed(2)),
-            high: parseFloat((Math.max(o, c) + Math.random() * precio * 0.002).toFixed(2)),
-            low: parseFloat((Math.min(o, c) - Math.random() * precio * 0.002).toFixed(2)),
-            close: parseFloat(c.toFixed(2))
-        });
-        precio = c;
-    }
-    ESTADO.serieVelas?.setData(velas);
-}
-
-// =========================================================
-// 📈 LIBRO DE ÓRDENES — Funcional y con filtros
-// =========================================================
-function inicializarLibroToggle() {
-    document.getElementById('todos-btn').addEventListener('click', () => cambiarVistaLibro('ambos'));
-    document.getElementById('compras-btn').addEventListener('click', () => cambiarVistaLibro('compras'));
-    document.getElementById('ventas-btn').addEventListener('click', () => cambiarVistaLibro('ventas'));
-}
-
-function cambiarVistaLibro(vista) {
-    ESTADO.libroVista = vista;
-    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('activo'));
-    document.getElementById(`${vista === 'ambos' ? 'todos' : vista === 'compras' ? 'compras' : 'ventas'}-btn`).classList.add('activo');
-    
-    const grid = document.getElementById('libroGrid');
-    if (vista === 'ambos') {
-        grid.style.display = 'grid';
-        grid.style.gridTemplateColumns = '1fr 1fr';
-    } else if (vista === 'compras') {
-        grid.style.display = 'grid';
-        grid.style.gridTemplateColumns = '1fr';
-        grid.children[1].style.display = 'none';
-    } else {
-        grid.style.display = 'grid';
-        grid.style.gridTemplateColumns = '1fr';
-        grid.children[0].style.display = 'none';
-    }
-    generarLibroOrdenes();
-}
-
-function generarLibroOrdenes() {
-    const base = ESTADO.precioActual || 68000;
-    const comprasEl = document.getElementById('listaCompras');
-    const ventasEl = document.getElementById('listaVentas');
-    
-    let htmlCompras = '', htmlVentas = '';
-    
-    for (let i = 5; i >= 1; i--) {
-        const prec = (base - i * (base * 0.001)).toFixed(2);
-        const cant = (Math.random() * 3).toFixed(4);
-        const total = (prec * cant).toFixed(2);
-        const ancho = Math.random() * 70 + 30;
-        htmlCompras += `
-            <div class="orden-item orden-compra" onclick="usarPrecio('${prec}')">
-                <div class="orden-bg" style="width: ${ancho}%;"></div>
-                <span class="orden-precio">${prec}</span>
-                <span class="orden-cant">${cant}</span>
-                <span class="orden-total">${total}</span>
-            </div>
-        `;
-    }
-    
-    for (let i = 1; i <= 5; i++) {
-        const prec = (base + i * (base * 0.001)).toFixed(2);
-        const cant = (Math.random() * 3).toFixed(4);
-        const total = (prec * cant).toFixed(2);
-        const ancho = Math.random() * 70 + 30;
-        htmlVentas += `
-            <div class="orden-item orden-venta" onclick="usarPrecio('${prec}')">
-                <div class="orden-bg" style="width: ${ancho}%;"></div>
-                <span class="orden-precio">${prec}</span>
-                <span class="orden-cant">${cant}</span>
-                <span class="orden-total">${total}</span>
-            </div>
-        `;
-    }
-    
-    comprasEl.innerHTML = htmlCompras;
-    ventasEl.innerHTML = htmlVentas;
-}
-
-// Tocar precio del libro → se llena automáticamente
-function usarPrecio(precio) {
-    document.getElementById('precio-compra').value = precio;
-    document.getElementById('precio-venta').value = precio;
-    recalcularTotales();
-    mostrarToast(`Precio seleccionado: ${precio}`);
-}
-
-// =========================================================
-// 📝 COMPRA / VENTA — Con validaciones COMPLETAS
-// =========================================================
-function cambiarOperacion(tipo) {
-    ESTADO.operacion = tipo;
-    document.getElementById('tab-compra').classList.toggle('activo', tipo === 'compra');
-    document.getElementById('tab-venta').classList.toggle('activo', tipo === 'venta');
-    document.getElementById('form-compra').classList.toggle('oculto', tipo !== 'compra');
-    document.getElementById('form-venta').classList.toggle('oculto', tipo !== 'venta');
-    limpiarErrores();
-}
-
-function inicializarTipoOrden() {
-    document.getElementById('tipo-compra').addEventListener('change', (e) => {
-        document.getElementById('grupo-precio-compra').style.display = e.target.value === 'limitada' ? 'block' : 'none';
-    });
-    document.getElementById('tipo-venta').addEventListener('change', (e) => {
-        document.getElementById('grupo-precio-venta').style.display = e.target.value === 'limitada' ? 'block' : 'none';
-    });
-    
-    // Recalcular totales al cambiar cantidad
-    document.getElementById('cantidad-compra').addEventListener('input', recalcularTotales);
-    document.getElementById('cantidad-venta').addEventListener('input', recalcularTotales);
-}
-
-function recalcularTotales() {
-    const cantCompra = parseFloat(document.getElementById('cantidad-compra').value) || 0;
-    const precioCompra = parseFloat(document.getElementById('precio-compra').value) || ESTADO.precioActual;
-    const totalCompra = cantCompra * precioCompra;
-    document.getElementById('total-compra').value = totalCompra.toFixed(2) + ' USDT';
-    
-    const cantVenta = parseFloat(document.getElementById('cantidad-venta').value) || 0;
-    const precioVenta = parseFloat(document.getElementById('precio-venta').value) || ESTADO.precioActual;
-    const totalVenta = cantVenta * precioVenta;
-    document.getElementById('total-venta').value = totalVenta.toFixed(2) + ' USDT';
-    
-    // Actualizar saldo disponible
-    document.getElementById('saldo-disponible').textContent = ESTADO.saldo.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' USDT';
-    document.getElementById('cantidad-disponible').textContent = (ESTADO.activos[ESTADO.simbolo.replace('USDT','')] || 0).toFixed(8);
-}
-
-function asignarPorcentaje(porc, tipo) {
-    const moneda = ESTADO.simbolo.replace('USDT','');
-    if (tipo === 'compra') {
-        const precio = parseFloat(document.getElementById('precio-compra').value) || ESTADO.precioActual;
-        const maxCant = ESTADO.saldo / precio;
-        document.getElementById('cantidad-compra').value = (maxCant * porc / 100).toFixed(8);
-    } else {
-        const disponible = ESTADO.activos[moneda] || 0;
-        document.getElementById('cantidad-venta').value = (disponible * porc / 100).toFixed(8);
-    }
-    recalcularTotales();
-}
-
-function limpiarErrores() {
-    document.getElementById('error-compra').classList.add('oculto');
-    document.getElementById('error-venta').classList.add('oculto');
-    document.getElementById('cantidad-compra').classList.remove('error');
-    document.getElementById('cantidad-venta').classList.remove('error');
-}
-
-function mostrarError(id, texto) {
-    const el = document.getElementById(id);
-    el.textContent = texto;
-    el.classList.remove('oculto');
-    document.getElementById(id.replace('error-','cantidad-')).classList.add('error');
-}
-
-function ejecutarCompra() {
-    limpiarErrores();
-    const cant = parseFloat(document.getElementById('cantidad-compra').value);
-    const precio = parseFloat(document.getElementById('precio-compra').value) || ESTADO.precioActual;
-    const total = cant * precio;
-    const moneda = ESTADO.simbolo.replace('USDT','');
-    
-    // ✅ VALIDACIONES COMPLETAS
-    if (!cant || cant <= 0) return mostrarError('error-compra', 'Ing
+        entradas.forEach(e
