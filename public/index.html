@@ -1,893 +1,138 @@
-<!DOCTYPE html>
-<html lang="es-MX">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Escalada Financiera — Trading</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.min.js"></script>
-    <style>
-:root {
-    --fondo-principal: #0B0E11;
-    --fondo-secundario: #15181E;
-    --fondo-terciario: #1E2329;
-    --fondo-hover: #2B3139;
-    --borde: #2B3139;
-    --texto: #EAECEF;
-    --texto-secundario: #848E9C;
-    --dorado: #F0B90B;
-    --verde: #0ECB81;
-    --verde-fondo: rgba(14, 203, 129, 0.15);
-    --rojo: #F6465D;
-    --rojo-fondo: rgba(246, 70, 93, 0.15);
-    --azul: #1E90FF;
-    --morado: #9333EA;
-    --naranja: #F97316;
-    --radio: 12px;
-    --transicion: all 0.15s ease;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-body { background: var(--fondo-principal); color: var(--texto); min-height: 100vh; padding-bottom: 80px; font-size: 14px; line-height: 1.5; }
-button { border: none; background: none; color: inherit; cursor: pointer; font-family: inherit; transition: var(--transicion); }
-button:disabled { opacity: 0.5; cursor: not-allowed; }
-input, select { font-family: inherit; font-size: 14px; }
-.oculto { display: none !important; }
-.cargando { opacity: 0.6; pointer-events: none; }
-
-/* ==============================================
-   🔝 BARRA SUPERIOR — Con usuario
-   ============================================== */
-.top-nav {
-    background: var(--fondo-secundario);
-    border-bottom: 1px solid var(--borde);
-    padding: 10px 16px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-.top-nav-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 800;
-    font-size: 18px;
-    background: linear-gradient(90deg, #F0B90B, #F8D54E);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-.logo-icon {
-    width: 28px;
-    height: 28px;
-    background: var(--dorado);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #000;
-    font-weight: 800;
-    font-size: 16px;
-}
-.usuario-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    background: var(--fondo-terciario);
-    border-radius: 20px;
-    border: 1px solid var(--dorado);
-}
-.usuario-avatar {
-    width: 28px;
-    height: 28px;
-    background: linear-gradient(135deg, var(--dorado), #F8D54E);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #000;
-    font-weight: 700;
-    font-size: 13px;
-}
-.usuario-nombre { font-weight: 600; font-size: 13px; }
-.simbolo-selector {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--fondo-terciario);
-    padding: 8px 14px;
-    border-radius: var(--radio);
-    border: 1px solid transparent;
-}
-.simbolo-selector:active { border-color: var(--dorado); }
-.simbolo-nombre { font-weight: 700; font-size: 15px; }
-.simbolo-cambio { font-size: 12px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
-.cambio-verde { background: var(--verde-fondo); color: var(--verde); }
-.cambio-rojo { background: var(--rojo-fondo); color: var(--rojo); }
-.precio-actual { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
-.precio-verde { color: var(--verde); }
-.precio-rojo { color: var(--rojo); }
-.balance-header { margin-left: auto; text-align: right; }
-.balance-etq { font-size: 11px; color: var(--texto-secundario); }
-.balance-val { font-weight: 700; font-size: 15px; }
-
-/* ==============================================
-   📊 GRÁFICA
-   ============================================== */
-.grafica-section {
-    padding: 12px;
-    background: var(--fondo-secundario);
-    border-bottom: 1px solid var(--borde);
-}
-.grafica-controls {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 12px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-}
-.tiempo-btn {
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--texto-secundario);
-    background: transparent;
-    white-space: nowrap;
-}
-.tiempo-btn.activo { background: var(--dorado); color: #000; }
-.tiempo-btn:hover:not(.activo) { background: var(--fondo-terciario); color: var(--texto); }
-.grafica-contenedor {
-    width: 100%;
-    height: 320px;
-    border-radius: var(--radio);
-    background: var(--fondo-principal);
-    will-change: transform;
-    transform: translateZ(0);
-}
-
-/* ==============================================
-   📈 LIBRO DE ÓRDENES
-   ============================================== */
-.libro-section {
-    padding: 12px;
-    background: var(--fondo-secundario);
-    border-bottom: 1px solid var(--borde);
-}
-.section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-}
-.section-tit { font-weight: 700; font-size: 14px; }
-.libro-toggle { display: flex; gap: 6px; }
-.toggle-btn {
-    padding: 5px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    background: var(--fondo-terciario);
-    color: var(--texto-secundario);
-}
-.toggle-btn.activo { background: var(--dorado); color: #000; }
-.libro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.libro-col-tit {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    font-size: 11px;
-    color: var(--texto-secundario);
-    padding: 4px 0 8px;
-}
-.orden-item {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    font-size: 12px;
-    padding: 5px 4px;
-    position: relative;
-    border-radius: 3px;
-    margin-bottom: 2px;
-    cursor: pointer;
-}
-.orden-compra { color: var(--verde); }
-.orden-venta { color: var(--rojo); }
-.orden-bg {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    opacity: 0.15;
-    border-radius: 3px;
-    pointer-events: none;
-}
-.orden-compra .orden-bg { background: var(--verde); }
-.orden-venta .orden-bg { background: var(--rojo); }
-.orden-item span { position: relative; z-index: 1; }
-.orden-precio { text-align: left; }
-.orden-cant { text-align: right; }
-.orden-total { text-align: right; }
-
-/* ==============================================
-   📝 COMPRA / VENTA
-   ============================================== */
-.operacion-section {
-    padding: 12px;
-    background: var(--fondo-secundario);
-    border-bottom: 1px solid var(--borde);
-}
-.operacion-tabs { display: flex; gap: 12px; margin-bottom: 16px; }
-.oper-tab {
-    font-size: 15px;
-    font-weight: 600;
-    padding: 8px 0;
-    border-bottom: 2px solid transparent;
-}
-.oper-tab.activo { border-bottom-color: var(--dorado); color: var(--dorado); }
-.form-group { margin-bottom: 14px; }
-.form-label {
-    font-size: 12px;
-    color: var(--texto-secundario);
-    margin-bottom: 6px;
-    display: flex;
-    justify-content: space-between;
-}
-.form-input {
-    width: 100%;
-    padding: 12px 14px;
-    background: var(--fondo-terciario);
-    border: 1px solid var(--borde);
-    border-radius: var(--radio);
-    color: var(--texto);
-    font-size: 15px;
-    outline: none;
-    transition: border-color 0.2s;
-}
-.form-input:focus { border-color: var(--dorado); }
-.form-input.error { border-color: var(--rojo); }
-.porcentajes {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-    margin-top: 8px;
-}
-.porcen-btn {
-    padding: 8px;
-    background: var(--fondo-terciario);
-    border-radius: var(--radio);
-    font-size: 13px;
-    color: var(--texto-secundario);
-}
-.porcen-btn.activo { background: var(--dorado); color: #000; }
-.btn-compra, .btn-venta, .btn-oxxo, .btn-primario {
-    width: 100%;
-    padding: 14px;
-    border-radius: var(--radio);
-    font-size: 16px;
-    font-weight: 700;
-    margin-top: 8px;
-}
-.btn-compra { background: linear-gradient(90deg, #0ECB81, #36D399); color: #fff; }
-.btn-venta { background: linear-gradient(90deg, #F6465D, #F87181); color: #fff; }
-.btn-oxxo { background: linear-gradient(90deg, #F5A623, #FFC107); color: #000; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.btn-primario { background: linear-gradient(90deg, var(--dorado), #F8D54E); color: #000; }
-.aviso { font-size: 11px; color: var(--texto-secundario); margin-top: 8px; text-align: center; }
-.error-texto { font-size: 12px; color: var(--rojo); margin-top: 4px; }
-
-/* ==============================================
-   📋 MERCADOS — COMPLETOS 40 activos
-   ============================================== */
-.mercados-section {
-    padding: 12px;
-    background: var(--fondo-secundario);
-    border-bottom: 1px solid var(--borde);
-}
-.buscar-mercados {
-    width: 100%;
-    padding: 10px 14px;
-    background: var(--fondo-terciario);
-    border: 1px solid var(--borde);
-    border-radius: var(--radio);
-    color: var(--texto);
-    font-size: 14px;
-    margin-bottom: 12px;
-    outline: none;
-}
-.buscar-mercados:focus { border-color: var(--dorado); }
-.filtros-mercados {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-    overflow-x: auto;
-}
-.filtro-btn {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    background: var(--fondo-terciario);
-    color: var(--texto-secundario);
-    white-space: nowrap;
-}
-.filtro-btn.activo { background: var(--dorado); color: #000; }
-.mercado-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 10px;
-    border-radius: var(--radio);
-    margin-bottom: 4px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-.mercado-item:hover { background: var(--fondo-terciario); }
-.mercado-left { display: flex; flex-direction: column; }
-.mercado-simbolo { font-weight: 700; font-size: 14px; }
-.mercado-nombre { font-size: 12px; color: var(--texto-secundario); margin-top: 2px; }
-.mercado-right { text-align: right; }
-.mercado-precio { font-weight: 600; font-size: 14px; }
-.mercado-cambio { font-size: 12px; margin-top: 2px; padding: 2px 6px; border-radius: 4px; display: inline-block; font-weight: 600; }
-.mercado-activo { font-size: 11px; color: var(--dorado); margin-top: 2px; }
-
-/* ==============================================
-   📑 PÁGINAS COMPLETAS
-   ============================================== */
-.pagina { display: none; }
-.pagina.activa { display: block; }
-.pagina-header {
-    padding: 16px;
-    border-bottom: 1px solid var(--borde);
-    font-size: 18px;
-    font-weight: 700;
-}
-.tarjeta {
-    background: var(--fondo-secundario);
-    border-radius: var(--radio);
-    padding: 16px;
-    margin: 12px;
-    border: 1px solid var(--borde);
-}
-.tarjeta-tit { font-weight: 700; margin-bottom: 12px; font-size: 15px; }
-.fila { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--borde); align-items: center; }
-.fila:last-child { border-bottom: none; }
-.etiqueta { color: var(--texto-secundario); font-size: 13px; }
-.valor { font-weight: 600; }
-.orden-historial {
-    display: flex;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--borde);
-    align-items: center;
-}
-.orden-tipo { font-weight: 700; font-size: 13px; }
-.orden-tipo.compra { color: var(--verde); }
-.orden-tipo.venta { color: var(--rojo); }
-.orden-estado { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: var(--verde-fondo); color: var(--verde); }
-.activos-grid { display: grid; gap: 8px; }
-.activo-item { display: flex; justify-content: space-between; padding: 10px; background: var(--fondo-terciario); border-radius: 8px; }
-.activo-nombre { font-weight: 600; }
-.activo-cantidad { color: var(--texto-secundario); font-size: 12px; margin-top: 2px; }
-.activo-valor { font-weight: 700; text-align: right; }
-
-/* ==============================================
-   🧭 MENÚ INFERIOR — SIEMPRE VISIBLE
-   ============================================== */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--fondo-secundario);
-    border-top: 1px solid var(--borde);
-    display: flex;
-    justify-content: space-around;
-    padding: 10px 0 20px;
-    z-index: 9999; /* ✅ Asegura que siempre esté arriba */
-}
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    opacity: 0.5;
-    transition: var(--transicion);
-    pointer-events: auto; /* ✅ Asegura que sea clickeable */
-}
-.nav-item.activo { opacity: 1; color: var(--dorado); }
-.nav-item span:first-child { font-size: 22px; }
-.nav-item span:last-child { font-size: 11px; }
-
-/* ==============================================
-   🔔 TOAST
-   ============================================== */
-.toast {
-    position: fixed;
-    top: 90px;
-    left: 16px;
-    right: 16px;
-    background: var(--fondo-terciario);
-    border: 1px solid var(--dorado);
-    border-radius: var(--radio);
-    padding: 14px;
-    z-index: 9999;
-    animation: deslizar 0.3s ease;
-    text-align: center;
-    font-weight: 600;
-}
-.toast.error { border-color: var(--rojo); }
-.toast.exito { border-color: var(--verde); }
-@keyframes deslizar {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-/* ==============================================
-   💳 MODAL DEPÓSITO — Con OXXO PAY
-   ============================================== */
-.modal-fondo {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.8);
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-.modal-contenido {
-    background: var(--fondo-secundario);
-    border-radius: var(--radio);
-    padding: 24px;
-    width: 100%;
-    max-width: 400px;
-    border: 1px solid var(--borde);
-}
-.modal-tit { font-size: 20px; font-weight: 700; margin-bottom: 20px; text-align: center; }
-.cerrar-modal {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    font-size: 24px;
-    color: var(--texto-secundario);
-    cursor: pointer;
-}
-.metodo-pago {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px;
-    background: var(--fondo-terciario);
-    border-radius: var(--radio);
-    margin-bottom: 10px;
-    cursor: pointer;
-    border: 2px solid transparent;
-}
-.metodo-pago.activo { border-color: var(--dorado); }
-.metodo-icono { font-size: 24px; }
-.metodo-info h4 { font-weight: 600; font-size: 14px; }
-.metodo-info p { font-size: 12px; color: var(--texto-secundario); margin-top: 2px; }
-.codigo-oxxo {
-    background: var(--fondo-principal);
-    padding: 16px;
-    border-radius: var(--radio);
-    text-align: center;
-    margin: 16px 0;
-    border: 1px dashed var(--dorado);
-}
-.codigo-texto {
-    font-family: monospace;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--dorado);
-    letter-spacing: 3px;
-    margin: 8px 0;
-}
-.tiempo-validez {
-    font-size: 12px;
-    color: var(--texto-secundario);
-    text-align: center;
-    margin-top: 8px;
-}
-    </style>
-</head>
-<body>
-
-<!-- ==============================================
-   🔝 BARRA SUPERIOR CON USUARIO
-   ============================================== -->
-<div class="top-nav">
-    <div class="top-nav-inner">
-        <div class="logo">
-            <div class="logo-icon">E</div>
-            <span>Escalada</span>
-        </div>
-        
-        <!-- ✅ NOMBRE DE USUARIO VISIBLE -->
-        <div class="usuario-info">
-            <div class="usuario-avatar">D</div>
-            <span class="usuario-nombre">Daniel A.</span>
-        </div>
-
-        <div class="simbolo-selector" onclick="scrollToMercados()">
-            <span class="simbolo-nombre" id="simboloActual">BTC/USDT</span>
-            <span class="simbolo-cambio cambio-verde" id="cambioActual">+0.00%</span>
-        </div>
-        <div class="precio-actual precio-verde" id="precioActual">--</div>
-        <div class="balance-header">
-            <div class="balance-etq">Saldo</div>
-            <div class="balance-val" id="saldoUsuario">$10,000.00</div>
-        </div>
-    </div>
-</div>
-
-<!-- ==============================================
-   📈 PÁGINA 1: TRADING
-   ============================================== -->
-<div id="pag-trading" class="pagina activa">
-    <!-- 📊 GRÁFICA -->
-    <div class="grafica-section">
-        <div class="grafica-controls">
-            <button class="tiempo-btn" data-tiempo="1m">1m</button>
-            <button class="tiempo-btn activo" data-tiempo="5m">5m</button>
-            <button class="tiempo-btn" data-tiempo="15m">15m</button>
-            <button class="tiempo-btn" data-tiempo="1h">1H</button>
-            <button class="tiempo-btn" data-tiempo="4h">4H</button>
-            <button class="tiempo-btn" data-tiempo="1d">1D</button>
-        </div>
-        <div class="grafica-contenedor" id="graficaContenedor"></div>
-    </div>
-
-    <!-- 📈 LIBRO DE ÓRDENES -->
-    <div class="libro-section">
-        <div class="section-header">
-            <span class="section-tit">Libro de Órdenes</span>
-            <div class="libro-toggle">
-                <button class="toggle-btn activo" id="todos-btn">Ambos</button>
-                <button class="toggle-btn" id="compras-btn">Compras</button>
-                <button class="toggle-btn" id="ventas-btn">Ventas</button>
-            </div>
-        </div>
-        <div class="libro-grid" id="libroGrid">
-            <div>
-                <div class="libro-col-tit">
-                    <span>Precio</span><span>Cantidad</span><span>Total</span>
-                </div>
-                <div id="listaCompras"></div>
-            </div>
-            <div>
-                <div class="libro-col-tit">
-                    <span>Precio</span><span>Cantidad</span><span>Total</span>
-                </div>
-                <div id="listaVentas"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 📝 COMPRA / VENTA -->
-    <div class="operacion-section">
-        <div class="operacion-tabs">
-            <button class="oper-tab activo" id="tab-compra" onclick="cambiarOperacion('compra')">Comprar</button>
-            <button class="oper-tab" id="tab-venta" onclick="cambiarOperacion('venta')">Vender</button>
-        </div>
-        
-        <div id="form-compra">
-            <div class="form-group">
-                <div class="form-label">Tipo de Orden</div>
-                <select class="form-input" id="tipo-compra">
-                    <option value="mercado">Orden de Mercado</option>
-                    <option value="limitada">Orden Limitada</option>
-                </select>
-            </div>
-            <div class="form-group" id="grupo-precio-compra" style="display:none;">
-                <div class="form-label">Precio</div>
-                <input type="number" step="0.01" class="form-input" id="precio-compra" placeholder="0.00">
-            </div>
-            <div class="form-group">
-                <div class="form-label">Cantidad <span id="moneda-compra">BTC</span></div>
-                <input type="number" step="0.00000001" class="form-input" id="cantidad-compra" placeholder="0.00000000">
-                <div class="porcentajes">
-                    <button class="porcen-btn" onclick="asignarPorcentaje(25, 'compra')">25%</button>
-                    <button class="porcen-btn" onclick="asignarPorcentaje(50, 'compra')">50%</button>
-                    <button class="porcen-btn" onclick="asignarPorcentaje(75, 'compra')">75%</button>
-                    <button class="porcen-btn" onclick="asignarPorcentaje(100, 'compra')">100%</button>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="form-label">Total</div>
-                <input type="text" class="form-input" id="total-compra" placeholder="0.00 USDT" readonly>
-            </div>
-            <div class="aviso">Comisión: 0.10% • Saldo: <span id="saldo-disponible">$10,000.00</span></div>
-            <div id="error-compra" class="error-texto oculto"></div>
-            <button class="btn-compra" onclick="ejecutarCompra()">Comprar <span id="btn-moneda-compra">BTC</span></button>
-        </div>
-
-        <div id="form-venta" class="oculto">
-            <div class="form-group">
-                <div class="form-label">Tipo de Orden</div>
-                <select class="form-input" id="tipo-venta">
-                    <option value="mercado">Orden de Mercado</option>
-                    <option value="limitada">Orden Limitada</option>
-                </select>
-            </div>
-            <div class="form-group" id="grupo-precio-venta" style="display:none;">
-                <div class="form-label">Precio</div>
-                <input type="number" step="0.01" class="form-input" id="precio-venta" placeholder="0.00">
-            </div>
-            <div class="form-group">
-                <div class="form-label">Cantidad <span id="moneda-venta">BTC</span> • Disponible: <span id="cantidad-disponible">0.00000000</span></div>
-                <input type="number" step="0.00000001" class="form-input" id="cantidad-venta" placeholder="0.00000000">
-                <div class="porcentajes">
-                    <button class="porcen-btn" onclick="asignarPorcentaje(25, 'venta')">25%</button>
-                    <button class="porcen-btn" onclick="asignarPorcentaje(50, 'venta')">50%</button>
-                    <button class="porcen-btn" onclick="asignarPorcentaje(75, 'venta')">75%</button>
-                    <button class="porcen-btn" onclick="asignarPorcentaje(100, 'venta')">100%</button>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="form-label">Total Estimado</div>
-                <input type="text" class="form-input" id="total-venta" placeholder="0.00 USDT" readonly>
-            </div>
-            <div class="aviso">Comisión: 0.10%</div>
-            <div id="error-venta" class="error-texto oculto"></div>
-            <button class="btn-venta" onclick="ejecutarVenta()">Vender <span id="btn-moneda-venta">BTC</span></button>
-        </div>
-    </div>
-
-    <!-- 📋 MERCADOS — 40 ACTIVOS COMPLETOS -->
-    <div class="mercados-section" id="seccion-mercados">
-        <div class="section-header">
-            <span class="section-tit">Mercados</span>
-        </div>
-        <input type="text" class="buscar-mercados" placeholder="Buscar par de monedas..." id="buscar-mercados" oninput="filtrarMercados()">
-        <div class="filtros-mercados">
-            <button class="filtro-btn activo" data-filtro="todos">Todos</button>
-            <button class="filtro-btn" data-filtro="cripto">Criptomonedas</button>
-            <button class="filtro-btn" data-filtro="divisas">Divisas</button>
-            <button class="filtro-btn" data-filtro="materias">Materias Primas</button>
-            <button class="filtro-btn" data-filtro="indices">Índices</button>
-        </div>
-        <div id="lista-mercados"></div>
-    </div>
-</div>
-
-<!-- ==============================================
-   📑 PÁGINA 2: ACTIVOS — Con saldo por mercado
-   ============================================== -->
-<div id="pag-activos" class="pagina">
-    <div class="pagina-header">Mis Activos</div>
-    <div class="tarjeta">
-        <div class="tarjeta-tit">Balance Total</div>
-        <div style="font-size:28px; font-weight:800; color:var(--dorado);">$10,000.00 USD</div>
-        <div style="color:var(--texto-secundario); font-size:13px; margin-top:4px;">≈ 0.146 BTC • ≈ 16,500 MXN</div>
-    </div>
-    
-    <!-- ✅ SALDO POR CADA MERCADO / ACTIVO -->
-    <div class="tarjeta">
-        <div class="tarjeta-tit">Portafolio por Activo</div>
-        <div class="activos-grid" id="portafolio-activos">
-            <!-- Se llena dinámicamente con saldo por cada mercado -->
-        </div>
-    </div>
-
-    <div class="tarjeta">
-        <button class="btn-oxxo" onclick="abrirModalDeposito()">💳 Depositar con OXXO Pay</button>
-        <button class="btn-primario" onclick="mostrarToast('Depósito con transferencia en proceso...')">🏦 Transferencia Bancaria</button>
-        <button class="btn-venta" style="margin-top:12px;" onclick="mostrarToast('Retiro solicitado')">💸 Retirar Fondos</button>
-    </div>
-</div>
-
-<!-- ==============================================
-   📑 PÁGINA 3: ÓRDENES
-   ============================================== -->
-<div id="pag-ordenes" class="pagina">
-    <div class="pagina-header">Mis Órdenes</div>
-    <div class="tarjeta">
-        <div class="tarjeta-tit">Órdenes Abiertas</div>
-        <div id="ordenes-abiertas">
-            <div style="text-align:center; color:var(--texto-secundario); padding:20px;">Sin órdenes abiertas</div>
-        </div>
-    </div>
-    <div class="tarjeta">
-        <div class="tarjeta-tit">Historial de Operaciones</div>
-        <div id="historial-ordenes">
-            <div style="text-align:center; color:var(--texto-secundario); padding:20px;">Sin operaciones aún</div>
-        </div>
-    </div>
-</div>
-
-<!-- ==============================================
-   📑 PÁGINA 4: CUENTA — Con datos de usuario
-   ============================================== -->
-<div id="pag-cuenta" class="pagina">
-    <div class="pagina-header">Mi Cuenta</div>
-    <div class="tarjeta">
-        <div class="tarjeta-tit">Perfil de Usuario</div>
-        <div class="fila"><span class="etiqueta">Nombre Completo</span><span class="valor">Daniel Alejandro Cortés Delgadillo</span></div>
-        <div class="fila"><span class="etiqueta">Usuario</span><span class="valor">@daniel_cortes</span></div>
-        <div class="fila"><span class="etiqueta">Correo</span><span class="valor">lu5173r@gmail.com</span></div>
-        <div class="fila"><span class="etiqueta">Teléfono</span><span class="valor">+52 5619015733</span></div>
-        <div class="fila"><span class="etiqueta">Dirección</span><span class="valor" style="font-size:11px; text-align:right; max-width:60%;">Costeñas 79, Col. La Aurora<br>Nezahualcóyotl, Edo. Méx.</span></div>
-        <div class="fila"><span class="etiqueta">Nivel</span><span class="valor" style="color:var(--dorado);">Verificado ✅</span></div>
-    </div>
-    <div class="tarjeta">
-        <div class="tarjeta-tit">Seguridad</div>
-        <div class="fila"><span class="etiqueta">Autenticación 2FA</span><span class="valor" style="color:var(--verde);">Activada ✅</span></div>
-        <div class="fila"><span class="etiqueta">Último acceso</span><span class="valor">Hoy 03:55 AM</span></div>
-        <div class="fila"><span class="etiqueta">Comisión por operación</span><span class="valor">0.10%</span></div>
-    </div>
-    <div class="tarjeta">
-        <div class="tarjeta-tit">Configuración</div>
-        <div class="fila"><span class="etiqueta">Notificaciones</span><span class="valor">Activadas</span></div>
-        <div class="fila"><span class="etiqueta">Moneda base</span><span class="valor">USD / MXN</span></div>
-        <div class="fila"><span class="etiqueta">Idioma</span><span class="valor">Español 🇲🇽</span></div>
-    </div>
-</div>
-
-<!-- ==============================================
-   💳 MODAL DEPÓSITO OXXO PAY
-   ============================================== -->
-<div id="modal-deposito" class="modal-fondo oculto">
-    <div class="modal-contenido" style="position:relative;">
-        <span class="cerrar-modal" onclick="cerrarModalDeposito()">&times;</span>
-        <h3 class="modal-tit">💳 Depositar Fondos</h3>
-        
-        <div class="form-group">
-            <div class="form-label">Monto a depositar (MXN)</div>
-            <input type="number" class="form-input" id="monto-deposito" placeholder="500.00" min="100" step="100">
-        </div>
-        
-        <p style="font-size:13px; color:var(--texto-secundario); margin:16px 0 8px;">Selecciona método de pago:</p>
-        
-        <div class="metodo-pago activo" onclick="seleccionarMetodo('oxxo')" id="metodo-oxxo">
-            <span class="metodo-icono">🏪</span>
-            <div class="metodo-info">
-                <h4>OXXO Pay</h4>
-                <p>Paga en efectivo en cualquier OXXO</p>
-            </div>
-        </div>
-        
-        <div class="metodo-pago" onclick="seleccionarMetodo('transferencia')" id="metodo-transferencia">
-            <span class="metodo-icono">🏦</span>
-            <div class="metodo-info">
-                <h4>Transferencia SPEI</h4>
-                <p>BBVA, Santander, Banamex, etc.</p>
-            </div>
-        </div>
-
-        <div id="info-oxxo">
-            <div class="codigo-oxxo">
-                <p style="font-size:13px; color:var(--texto-secundario);">Código de pago OXXO</p>
-                <div class="codigo-texto">8827 3456 7890 1234</div>
-                <button class="btn-primario" style="padding:8px 16px; font-size:13px; margin-top:8px;" onclick="mostrarToast('Código copiado ✅')">📋 Copiar Código</button>
-            </div>
-            <p class="tiempo-validez">⏳ Válido por 24 horas • Paga en cualquier OXXO • Se acredita en 15-60 min</p>
-        </div>
-
-        <button class="btn-oxxo" style="margin-top:20px;" onclick="confirmarDeposito()">✅ Generar Código de Pago</button>
-    </div>
-</div>
-
-<!-- ==============================================
-   🧭 MENÚ INFERIOR — SIEMPRE VISIBLE Y CLICKEABLE
-   ============================================== -->
-<div class="bottom-nav">
-    <div class="nav-item activo" data-pagina="trading">
-        <span>📈</span>
-        <span>Trading</span>
-    </div>
-    <div class="nav-item" data-pagina="activos">
-        <span>💰</span>
-        <span>Activos</span>
-    </div>
-    <div class="nav-item" data-pagina="ordenes">
-        <span>📋</span>
-        <span>Órdenes</span>
-    </div>
-    <div class="nav-item" data-pagina="cuenta">
-        <span>👤</span>
-        <span>Cuenta</span>
-    </div>
-</div>
-
-<script>
 // =========================================================
-// 🚀 ESTADO GLOBAL — COMPLETO
+// 🚀 CONEXIÓN A TWELVE DATA API — TU KEY INCLUIDA ✅
 // =========================================================
-const ESTADO = {
-    usuario: {
-        nombre: "Daniel Alejandro Cortés Delgadillo",
-        usuario: "@daniel_cortes",
-        correo: "lu5173r@gmail.com",
-        telefono: "5619015733",
-        direccion: "Costeñas 79, Col. La Aurora, Nezahualcóyotl, Edo. Méx."
-    },
-    simbolo: "BTCUSDT",
-    nombrePar: "BTC/USDT",
-    precioActual: 0,
-    cambio24h: 0,
-    intervalo: "5m",
-    saldo: 10000.00,
-    saldoMXN: 185000.00,
-    activos: { BTC: 0.0015, ETH: 0.05, SOL: 2.5, USDT: 10000 },
-    historial: [],
-    grafica: null,
-    serieVelas: null,
-    ultimaActualizacion: 0,
-    libroVista: "ambos",
-    operacion: "compra",
-    filtroMercados: "todos"
+const CONFIG_API = {
+    urlBase: "https://api.twelvedata.com",
+    apiKey: "06834e5ac2314d3fb0be9874b2bae062", // ✅ TU API KEY
+    endpoints: {
+        precio: "/quote",
+        velas: "/time_series"
+    }
 };
 
 // =========================================================
-// 📋 40 MERCADOS COMPLETOS — 5 categorías
+// 📡 TRAER PRECIO ACTUAL DESDE TWELVE DATA
 // =========================================================
-const MERCADOS = [
-    // 🔵 CRIPTOMONEDAS (20)
-    { simbolo: "BTCUSDT", nombre: "Bitcoin", moneda: "BTC", categoria: "cripto" },
-    { simbolo: "ETHUSDT", nombre: "Ethereum", moneda: "ETH", categoria: "cripto" },
-    { simbolo: "SOLUSDT", nombre: "Solana", moneda: "SOL", categoria: "cripto" },
-    { simbolo: "XRPUSDT", nombre: "Ripple", moneda: "XRP", categoria: "cripto" },
-    { simbolo: "ADAUSDT", nombre: "Cardano", moneda: "ADA", categoria: "cripto" },
-    { simbolo: "DOTUSDT", nombre: "Polkadot", moneda: "DOT", categoria: "cripto" },
-    { simbolo: "MATICUSDT", nombre: "Polygon", moneda: "MATIC", categoria: "cripto" },
-    { simbolo: "AVAXUSDT", nombre: "Avalanche", moneda: "AVAX", categoria: "cripto" },
-    { simbolo: "LINKUSDT", nombre: "Chainlink", moneda: "LINK", categoria: "cripto" },
-    { simbolo: "UNIUSDT", nombre: "Uniswap", moneda: "UNI", categoria: "cripto" },
-    { simbolo: "LTCUSDT", nombre: "Litecoin", moneda: "LTC", categoria: "cripto" },
-    { simbolo: "BCHUSDT", nombre: "Bitcoin Cash", moneda: "BCH", categoria: "cripto" },
-    { simbolo: "ATOMUSDT", nombre: "Cosmos", moneda: "ATOM", categoria: "cripto" },
-    { simbolo: "NEARUSDT", nombre: "Near Protocol", moneda: "NEAR", categoria: "cripto" },
-    { simbolo: "FTMUSDT", nombre: "Fantom", moneda: "FTM", categoria: "cripto" },
-    { simbolo: "SANDUSDT", nombre: "The Sandbox", moneda: "SAND", categoria: "cripto" },
-    { simbolo: "MANAUSDT", nombre: "Decentraland", moneda: "MANA", categoria: "cripto" },
-    { simbolo: "AXSUSDT", nombre: "Axie Infinity", moneda: "AXS", categoria: "cripto" },
-    { simbolo: "DOGEUSDT", nombre: "Dogecoin", moneda: "DOGE", categoria: "cripto" },
-    { simbolo: "SHIBUSDT", nombre: "Shiba Inu", moneda: "SHIB", categoria: "cripto" },
-    
-    // 💵 DIVISAS / FOREX (10)
-    { simbolo: "EURUSDT", nombre: "Euro/Dólar", moneda: "EUR", categoria: "divisas" },
-    { simbolo: "GBPUSDT", nombre: "Libra/Dólar", moneda: "GBP", categoria: "divisas" },
-    { simbolo: "USDJPY", nombre: "Dólar/Yen", moneda: "USD", categoria: "divisas" },
-    { simbolo: "USDMXN", nombre: "Dólar/Peso Mexicano", moneda: "USD", categoria: "divisas" },
-    { simbolo: "AUDUSD", nombre: "Dólar Australiano", moneda: "AUD", categoria: "divisas" },
-    { simbolo: "CADUSD", nombre: "Dólar Canadiense", moneda: "CAD", categoria: "divisas" },
-    { simbolo: "CHFUSD", nombre: "Franco Suizo", moneda: "CHF", categoria: "divisas" },
-    { simbolo: "CNYUSD", nombre: "Yuan Chino", moneda: "CNY", categoria: "divisas" },
-    { simbolo: "KRWUSD", nombre: "Won Coreano", moneda: "KRW", categoria: "divisas" },
-    { simbolo: "SGDUSD", nombre: "Dólar Singapur", moneda: "SGD", categoria: "divisas" },
-    
-    // 🪙 MATERIAS PRIMAS (5)
-    { simbolo: "XAUUSDT", nombre: "Oro (Onza)", moneda: "XAU", categoria: "materias" },
-    { simbolo: "XAGUSDT", nombre: "Plata (Onza)", moneda: "XAG", categoria: "materias" },
-    { simbolo: "XCUUSDT", nombre: "Cobre", moneda: "XCU", categoria: "materias" },
-    { simbolo: "OILUSDT", nombre: "Petróleo WTI", moneda: "OIL", categoria: "materias" },
-    { simbolo: "NATGAS", nombre: "Gas Natural", moneda: "GAS", categoria: "materias" },
-    
-    // 📊 ÍNDICES (5)
-    { simbolo: "SPXUSDT", nombre: "S&P 500", moneda: "SPX", categoria: "indices" },
-    { simbolo: "NASUSDT", nombre: "Nasdaq 100", moneda: "NAS", categoria: "indices" },
-    { simbolo: "DJIUSDT", nombre: "Dow Jones", moneda: "DJI", categoria: "indices" },
-    { simbolo: "NIKKEI", nombre: "Nikkei 225", moneda: "NIK", categoria: "indices" },
-    { simbolo: "IPCUSDT", nombre: "IPC México", moneda: "IPC", categoria: "indices" },
-];
+async function cargarPrecioDesdeTuAPI(simbolo) {
+    try {
+        // Convertir formato: BTCUSDT → BTC/USD (Twelve Data usa barra)
+        const simboloTwelve = simbolo.replace("USDT", "/USD").replace("USDC", "/USD");
+        
+        const url = `${CONFIG_API.urlBase}${CONFIG_API.endpoints.precio}?symbol=${simboloTwelve}&apikey=${CONFIG_API.apiKey}`;
+        
+        const respuesta = await fetch(url);
+        if (!respuesta.ok) throw new Error(`Error: ${respuesta.status}`);
+        const datos = await respuesta.json();
+
+        if (datos.code === 400 || datos.message) throw new Error(datos.message || "Símbolo no encontrado");
+
+        // ✅ Extraer datos del formato de Twelve Data
+        const precio = parseFloat(datos.price);
+        const cambio = parseFloat(datos.change_percent);
+
+        if (!precio) throw new Error("Precio no disponible");
+
+        ESTADO.precioActual = precio;
+        ESTADO.cambio24h = cambio || 0;
+
+        // Actualizar interfaz
+        const precioEl = document.getElementById('precioActual');
+        const cambioEl = document.getElementById('cambioActual');
+        
+        precioEl.textContent = precio.toLocaleString('en-US', { minimumFractionDigits: 2 });
+        precioEl.className = `precio-actual ${ESTADO.cambio24h >= 0 ? 'precio-verde' : 'precio-rojo'}`;
+        
+        cambioEl.textContent = `${ESTADO.cambio24h >= 0 ? '+' : ''}${ESTADO.cambio24h.toFixed(2)}%`;
+        cambioEl.className = `simbolo-cambio ${ESTADO.cambio24h >= 0 ? 'cambio-verde' : 'cambio-rojo'}`;
+
+        recalcularTotales();
+        
+        // 🔄 Actualizar cada 10s (Twelve Data recomienda no muy rápido)
+        setTimeout(() => cargarPrecioDesdeTuAPI(simbolo), 10000);
+
+    } catch (error) {
+        console.error("❌ Error Twelve Data (precio):", error);
+        mostrarToast("Error cargando precio — Reintentando...", "error");
+        setTimeout(() => cargarPrecioDesdeTuAPI(simbolo), 15000);
+    }
+}
 
 // =========================================================
-// 🚀 INICIO COMPLETO
+// 🕯️ TRAER VELAS JAPONESAS DESDE TWELVE DATA
 // =========================================================
-document.addEventListener('DOMContentLoaded', () => {
-    inicializarNavegacion();
-    inicializarFiltrosMercados();
-    renderizarMercados();
-    inicializarLibroToggle();
-    inicializarTipoOrden();
-    actualizarPortafolioUI();
+async function cargarVelasDesdeTuAPI(simbolo, intervalo) {
+    try {
+        // Convertir intervalo: 15m → 15min, 1h → 1h, 1d → 1day
+        const mapaIntervalos = {
+            "1m": "1min", "5m": "5min", "15m": "15min",
+            "30m": "30min", "1h": "1h", "4h": "4h", "1d": "1day"
+        };
+        const intervaloTwelve = mapaIntervalos[intervalo] || "5min";
+        
+        // Convertir símbolo: BTCUSDT → BTC/USD
+        const simboloTwelve = simbolo.replace("USDT", "/USD").replace("USDC", "/USD");
+        
+        const url = `${CONFIG_API.urlBase}${CONFIG_API.endpoints.velas}?symbol=${simboloTwelve}&interval=${intervaloTwelve}&outputsize=50&apikey=${CONFIG_API.apiKey}`;
+        
+        const respuesta = await fetch(url);
+        if (!respuesta.ok) throw new Error(`Error velas: ${respuesta.status}`);
+        const datos = await respuesta.json();
+
+        if (!datos.values || datos.code) throw new Error(datos.message || "Sin datos de velas");
+
+        // ✅ Convertir al formato de la gráfica Lightweight Charts
+        const listaVelas = datos.values.map(v => ({
+            time: new Date(v.datetime).getTime() / 1000,
+            open: parseFloat(v.open),
+            high: parseFloat(v.high),
+            low: parseFloat(v.low),
+            close: parseFloat(v.close)
+        })).reverse(); // Twelve Data trae del más reciente al más antiguo → invertir
+
+        ESTADO.serieVelas?.setData(listaVelas);
+        ESTADO.grafica?.timeScale().fitContent();
+
+        // Línea de precio actual
+        if (ESTADO.precioActual) {
+            ESTADO.serieVelas?.createPriceLine({
+                price: ESTADO.precioActual,
+                color: '#F0B90B',
+                lineWidth: 2,
+                lineStyle: LightweightCharts.LineStyle.Dashed,
+                axisLabelVisible: true,
+                title: 'Actual'
+            });
+        }
+
+    } catch (error) {
+        console.error("❌ Error Twelve Data (velas):", error);
+        mostrarToast("No se pudieron cargar las velas", "error");
+    }
+}
+
+// =========================================================
+// 🔄 REEMPLAZA LAS LLAMADAS EN EL CÓDIGO PRINCIPAL
+// =========================================================
+// Busca en tu código y CAMBIA:
+// ❌ cargarPrecioBinance(ESTADO.simbolo)
+// ✅ cargarPrecioDesdeTuAPI(ESTADO.simbolo)
+//
+// ❌ cargarVelasBinance(ESTADO.simbolo, ESTADO.intervalo)
+// ✅ cargarVelasDesdeTuAPI(ESTADO.simbolo, ESTADO.intervalo)
+
+// =========================================================
+// 📋 ACTUALIZAR FUNCIÓN DE SELECCIÓN DE MERCADO
+// =========================================================
+function seleccionarMercado(simbolo, nombre) {
+    ESTADO.simbolo = simbolo;
+    ESTADO.nombrePar = nombre;
     
-    // Lazy Load gráfica
-    const observador = new IntersectionObserver((entradas) => {
-        entradas.forEach(e
+    // Actualizar UI
+    document.getElementById('simboloActual').textContent = simbolo.replace("USDT", "/USDT");
+    
+    // Cargar datos desde TWELVE DATA
+    cargarPrecioDesdeTuAPI(simbolo);
+    cargarVelasDesdeTuAPI(simbolo, ESTADO.intervalo);
+    generarLibroOrdenes();
+    mostrarToast(`✅ Seleccionado: ${simbolo}`);
+}
