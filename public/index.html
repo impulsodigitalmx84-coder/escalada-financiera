@@ -1,138 +1,762 @@
-// =========================================================
-// 🚀 CONEXIÓN A TWELVE DATA API — TU KEY INCLUIDA ✅
-// =========================================================
-const CONFIG_API = {
-    urlBase: "https://api.twelvedata.com",
-    apiKey: "06834e5ac2314d3fb0be9874b2bae062", // ✅ TU API KEY
-    endpoints: {
-        precio: "/quote",
-        velas: "/time_series"
-    }
-};
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escalada Financiera</title>
+    <!-- Fuente profesional -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- 📊 LIBRERÍA DE VELAS JAPONESAS -->
+    <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.min.js"></script>
+    <style>
+:root {
+    --fondo-principal: #050C18;
+    --fondo-tarjeta: #0F172A;
+    --fondo-hover: #1E293B;
+    --borde: #1E3A5F;
+    --texto: #F8FAFC;
+    --texto-secundario: #94A3B8;
+    --dorado: #C8A951;
+    --dorado-claro: #E8D48F;
+    --verde-ganancia: #00C076;
+    --rojo-perdida: #FF4757;
+    --azul-acento: #3B82F6;
+    --degradado-dorado: linear-gradient(135deg, #C8A951, #E8D48F);
+}
 
-// =========================================================
-// 📡 TRAER PRECIO ACTUAL DESDE TWELVE DATA
-// =========================================================
-async function cargarPrecioDesdeTuAPI(simbolo) {
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+    background: var(--fondo-principal);
+    color: var(--texto);
+    min-height: 100vh;
+    padding-bottom: 85px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+.oculto { display: none !important; }
+button { border: none; background: none; color: inherit; cursor: pointer; }
+
+.top-bar {
+    padding: 20px 16px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, var(--fondo-tarjeta) 0%, transparent 100%);
+    border-bottom: 1px solid var(--borde);
+}
+
+.saldo-header { text-align: center; flex: 1; }
+.saldo-tit { font-size: 13px; color: var(--texto-secundario); font-weight: 500; }
+.saldo-val {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: var(--degradado-dorado);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.icon-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: var(--fondo-tarjeta);
+    border: 1px solid var(--borde);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: all 0.2s;
+}
+.icon-btn:active { background: var(--dorado); transform: scale(0.95); }
+
+.search-bar { margin: 16px; position: relative; }
+.search-input {
+    width: 100%;
+    padding: 14px 14px 14px 44px;
+    background: var(--fondo-tarjeta);
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    color: var(--texto);
+    font-size: 15px;
+    transition: border-color 0.2s;
+}
+.search-input:focus { outline: none; border-color: var(--dorado); }
+.search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--texto-secundario);
+    font-size: 18px;
+}
+
+.categorias {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 0 16px 20px;
+}
+.cat-btn {
+    background: var(--fondo-tarjeta);
+    border-radius: 12px;
+    padding: 16px 8px;
+    text-align: center;
+    transition: all 0.25s ease;
+    border: 1px solid transparent;
+}
+.cat-btn.activo {
+    border-color: var(--dorado);
+    background: var(--fondo-hover);
+    box-shadow: 0 0 0 1px var(--dorado);
+}
+.cat-icon { font-size: 22px; margin-bottom: 6px; }
+.cat-nom { font-size: 13px; font-weight: 600; }
+
+/* 📊 GRÁFICA DE VELAS JAPONESAS */
+.grafica-seccion {
+    margin: 0 16px 20px;
+    background: var(--fondo-tarjeta);
+    border-radius: 12px;
+    border: 1px solid var(--borde);
+    padding: 16px;
+}
+.grafica-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.grafica-simbolo {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dorado);
+}
+.grafica-tiempo {
+    display: flex;
+    gap: 6px;
+}
+.tiempo-btn {
+    padding: 6px 12px;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--texto-secundario);
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+.tiempo-btn.activo {
+    background: var(--dorado);
+    color: #000;
+    border-color: var(--dorado);
+}
+.grafica-contenedor {
+    width: 100%;
+    height: 320px;
+    border-radius: 8px;
+    background: #0A0F1A;
+}
+
+.seccion-tit {
+    font-size: 14px;
+    color: var(--texto-secundario);
+    padding: 0 16px 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.lista-mercados { padding: 0 0 16px; }
+.mercado-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    margin: 0 16px 8px;
+    background: var(--fondo-tarjeta);
+    border-radius: 12px;
+    border: 1px solid var(--borde);
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+.mercado-item:hover {
+    background: var(--fondo-hover);
+    border-color: var(--dorado);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(200, 169, 81, 0.1);
+}
+.mercado-nom { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; }
+.mercado-desc { font-size: 12px; color: var(--texto-secundario); margin-top: 3px; }
+.mercado-precios { text-align: right; }
+.precio-compra {
+    font-size: 16px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.3px;
+}
+.cambio-pos {
+    color: var(--verde-ganancia);
+    font-size: 13px;
+    font-weight: 600;
+    background: rgba(0, 192, 118, 0.1);
+    padding: 3px 10px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-top: 4px;
+}
+.cambio-neg {
+    color: var(--rojo-perdida);
+    font-size: 13px;
+    font-weight: 600;
+    background: rgba(255, 71, 87, 0.1);
+    padding: 3px 10px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-top: 4px;
+}
+
+.op-header {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--borde);
+    background: var(--fondo-tarjeta);
+}
+.op-tit { font-size: 18px; font-weight: 700; }
+
+.form-section { padding: 20px 16px; }
+.form-tit { font-size: 17px; font-weight: 700; margin-bottom: 20px; color: var(--dorado); }
+.input-group { margin-bottom: 20px; }
+.input-group label {
+    display: block;
+    font-size: 14px;
+    color: var(--texto-secundario);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+.input-group input {
+    width: 100%;
+    padding: 15px;
+    background: var(--fondo-tarjeta);
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    color: var(--texto);
+    font-size: 15px;
+    transition: border-color 0.2s;
+}
+.input-group input:focus { outline: none; border-color: var(--dorado); }
+
+.metodo-pago {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 16px;
+    border-bottom: 1px solid var(--borde);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.metodo-pago:hover { background: var(--fondo-hover); }
+.metodo-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--fondo-tarjeta);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    border: 1px solid var(--borde);
+}
+.metodo-info { flex: 1; }
+.metodo-nom { font-size: 15px; font-weight: 600; }
+.metodo-desc { font-size: 12px; color: var(--texto-secundario); margin-top: 3px; }
+
+.papelera {
+    background: #fff;
+    color: #000;
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.papelera-header {
+    text-align: center;
+    border-bottom: 2px dashed #E2E8F0;
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+}
+.papelera-tit {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1E293B;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+}
+.papelera-sub { font-size: 13px; color: #64748B; }
+.papelera-fila {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #F1F5F9;
+    font-size: 14px;
+}
+.papelera-fila:last-child { border-bottom: none; }
+.papelera-etq { color: #64748B; font-weight: 500; }
+.papelera-val {
+    font-weight: 700;
+    text-align: right;
+    max-width: 55%;
+    word-break: break-all;
+    color: #1E293B;
+}
+.papelera-destacado {
+    background: linear-gradient(135deg, #F8FAFC, #F1F5F9);
+    padding: 14px;
+    border-radius: 10px;
+    margin: 16px 0;
+    border-left: 3px solid var(--dorado);
+}
+.papelera-codigo {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--azul-acento);
+    text-align: center;
+    letter-spacing: 2px;
+    margin: 16px 0;
+    padding: 12px;
+    background: #F8FAFC;
+    border-radius: 8px;
+}
+.papelera-pie {
+    font-size: 12px;
+    color: #94A3B8;
+    text-align: center;
+    margin-top: 20px;
+    line-height: 1.6;
+}
+
+.btn-primario {
+    width: 100%;
+    padding: 16px;
+    background: var(--degradado-dorado);
+    color: #000;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(200, 169, 81, 0.25);
+    margin-top: 8px;
+}
+.btn-primario:active { transform: scale(0.98); box-shadow: 0 2px 6px rgba(200, 169, 81, 0.2); }
+
+.btn-secundario {
+    width: 100%;
+    padding: 15px;
+    background: var(--fondo-tarjeta);
+    color: var(--texto);
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 12px;
+    border: 1px solid var(--borde);
+    transition: all 0.2s;
+}
+.btn-secundario:hover { border-color: var(--dorado); background: var(--fondo-hover); }
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--borde);
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0 25px;
+    z-index: 100;
+}
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.5;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.nav-item span:first-child { font-size: 22px; }
+.nav-item span:last-child { font-size: 11px; color: var(--texto-secundario); font-weight: 500; }
+.nav-item.activo { opacity: 1; }
+.nav-item.activo span:first-child {
+    color: var(--dorado);
+    filter: drop-shadow(0 0 6px rgba(200, 169, 81, 0.4));
+}
+
+.toast {
+    position: fixed;
+    top: 60px;
+    left: 16px;
+    right: 16px;
+    background: var(--fondo-tarjeta);
+    border: 1px solid var(--dorado);
+    border-radius: 12px;
+    padding: 14px 16px;
+    z-index: 200;
+    animation: deslizar 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+@keyframes deslizar {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@media print {
+    body * { visibility: hidden; }
+    .papelera, .papelera * { visibility: visible; }
+    .papelera { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; }
+}
+    </style>
+</head>
+<body>
+<div id="pagInicio">
+    <div class="top-bar">
+        <button class="icon-btn">☰</button>
+        <div class="saldo-header">
+            <div class="saldo-tit">Saldo Disponible</div>
+            <div class="saldo-val" id="saldo">$10,000.00</div>
+        </div>
+        <button class="icon-btn" onclick="irDeposito()">💰</button>
+    </div>
+
+    <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" placeholder="Buscar mercado..." id="buscar" oninput="filtrarMercados()">
+    </div>
+
+    <div class="categorias">
+        <button class="cat-btn activo" data-cat="todos" onclick="cambiarCat(this)">
+            <div class="cat-icon">🔥</div>
+            <div class="cat-nom">Populares</div>
+        </button>
+        <button class="cat-btn" data-cat="indices" onclick="cambiarCat(this)">
+            <div class="cat-icon">🏛️</div>
+            <div class="cat-nom">Índices</div>
+        </button>
+        <button class="cat-btn" data-cat="forex" onclick="cambiarCat(this)">
+            <div class="cat-icon">💱</div>
+            <div class="cat-nom">Forex</div>
+        </button>
+        <button class="cat-btn" data-cat="materias" onclick="cambiarCat(this)">
+            <div class="cat-icon">⛏️</div>
+            <div class="cat-nom">Materias</div>
+        </button>
+        <button class="cat-btn" data-cat="acciones" onclick="cambiarCat(this)">
+            <div class="cat-icon">📈</div>
+            <div class="cat-nom">Acciones</div>
+        </button>
+        <button class="cat-btn" data-cat="cripto" onclick="cambiarCat(this)">
+            <div class="cat-icon">🪙</div>
+            <div class="cat-nom">Cripto</div>
+        </button>
+    </div>
+
+    <!-- 📊 GRÁFICA DE VELAS JAPONESAS - VISIBLE DESDE EL INICIO -->
+    <div class="grafica-seccion" id="seccionGrafica">
+        <div class="grafica-header">
+            <div class="grafica-simbolo" id="graficaSimbolo">XAU/USD — Oro</div>
+            <div class="grafica-tiempo">
+                <button class="tiempo-btn activo" data-tiempo="15min">15m</button>
+                <button class="tiempo-btn" data-tiempo="1h">1H</button>
+                <button class="tiempo-btn" data-tiempo="4h">4H</button>
+                <button class="tiempo-btn" data-tiempo="1day">1D</button>
+            </div>
+        </div>
+        <div class="grafica-contenedor" id="graficaContenedor"></div>
+    </div>
+
+    <div class="seccion-tit">Mercados más activos</div>
+    <div class="lista-mercados" id="listaMercados">
+        <!-- Los mercados se cargan con JS -->
+    </div>
+</div>
+
+<div id="pagDeposito" class="oculto">
+    <div class="op-header">
+        <button class="icon-btn" onclick="irInicio()">←</button>
+        <div class="op-tit">Depositar Fondos</div>
+        <div></div>
+    </div>
+    <div class="form-section">
+        <div class="form-tit">Método de Pago</div>
+        <div class="metodo-pago" onclick="seleccionarPago('oxxo')">
+            <div class="metodo-icon">🏪</div>
+            <div class="metodo-info">
+                <div class="metodo-nom">OXXO Pay</div>
+                <div class="metodo-desc">Paga en efectivo en cualquier OXXO</div>
+            </div>
+            <div>▶</div>
+        </div>
+    </div>
+    <div class="form-section">
+        <div class="form-tit">Datos del Depósito</div>
+        <div class="input-group">
+            <label>Monto a depositar ($)</label>
+            <input type="number" id="montoDep" placeholder="Ej. 500" min="10">
+        </div>
+        <div class="input-group">
+            <label>Tu Nombre Completo</label>
+            <input type="text" id="nombreDep" placeholder="Tu nombre">
+        </div>
+        <button class="btn-primario" onclick="generarComprobante()">Generar Comprobante</button>
+        <button class="btn-secundario" onclick="irInicio()">Cancelar</button>
+    </div>
+    <div id="comprobanteArea" class="oculto"></div>
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item activo" onclick="cambiarPagina('inicio')">
+        <span>🏠</span>
+        <span>Inicio</span>
+    </div>
+    <div class="nav-item" onclick="cambiarPagina('mercados')">
+        <span>📊</span>
+        <span>Mercados</span>
+    </div>
+    <div class="nav-item" onclick="cambiarPagina('operar')">
+        <span>📈</span>
+        <span>Operar</span>
+    </div>
+    <div class="nav-item" onclick="cambiarPagina('cuenta')">
+        <span>👤</span>
+        <span>Cuenta</span>
+    </div>
+</div>
+
+<script>
+// ==============================================
+// DATOS DE MERCADOS
+// ==============================================
+const mercados = [
+    { simbolo: "XAU/USD", nombre: "Oro", cat: "materias", precio: 1907.80, cambio: 0.42 },
+    { simbolo: "EUR/USD", nombre: "Euro/Dólar", cat: "forex", precio: 1.0875, cambio: -0.15 },
+    { simbolo: "BTC/USD", nombre: "Bitcoin", cat: "cripto", precio: 68450.25, cambio: 3.25 },
+    { simbolo: "USD/MXN", nombre: "Dólar/Peso", cat: "forex", precio: 20.15, cambio: 0.30 },
+    { simbolo: "XAG/USD", nombre: "Plata", cat: "materias", precio: 23.45, cambio: -0.20 },
+    { simbolo: "SPX", nombre: "S&P 500", cat: "indices", precio: 5820.50, cambio: 1.25 },
+    { simbolo: "AAPL", nombre: "Apple", cat: "acciones", precio: 225.30, cambio: 0.85 },
+    { simbolo: "ETH/USD", nombre: "Ethereum", cat: "cripto", precio: 2850.75, cambio: 2.10 },
+];
+
+// ==============================================
+// NAVEGACIÓN BÁSICA
+// ==============================================
+function cambiarPagina(pag) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('activo'));
+    event.target.closest('.nav-item').classList.add('activo');
+    if (pag === 'inicio') { irInicio(); }
+    else { mostrarToast('Sección en desarrollo'); }
+}
+
+function irInicio() {
+    document.getElementById('pagInicio').classList.remove('oculto');
+    document.getElementById('pagDeposito').classList.add('oculto');
+    document.querySelectorAll('.nav-item').forEach((n,i) => n.classList.toggle('activo', i === 0));
+}
+
+function irDeposito() {
+    document.getElementById('pagInicio').classList.add('oculto');
+    document.getElementById('pagDeposito').classList.remove('oculto');
+}
+
+// ==============================================
+// CATEGORÍAS Y FILTROS
+// ==============================================
+let catActiva = 'todos';
+function cambiarCat(btn) {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('activo'));
+    btn.classList.add('activo');
+    catActiva = btn.dataset.cat;
+    renderizarMercados();
+}
+
+function filtrarMercados() { renderizarMercados(); }
+
+function renderizarMercados() {
+    const busqueda = document.getElementById('buscar').value.toLowerCase();
+    const lista = document.getElementById('listaMercados');
+    const filtrados = mercados.filter(m => 
+        (catActiva === 'todos' || m.cat === catActiva) &&
+        (m.simbolo.toLowerCase().includes(busqueda) || m.nombre.toLowerCase().includes(busqueda))
+    );
+    lista.innerHTML = filtrados.map(m => `
+        <div class="mercado-item" data-simbolo="${m.simbolo}" onclick="seleccionarMercado('${m.simbolo}')">
+            <div>
+                <div class="mercado-nom">${m.simbolo}</div>
+                <div class="mercado-desc">${m.nombre}</div>
+            </div>
+            <div class="mercado-precios">
+                <div class="precio-compra">${m.precio.toFixed(2)}</div>
+                <div class="${m.cambio >= 0 ? 'cambio-pos' : 'cambio-neg'}">
+                    ${m.cambio >= 0 ? '+' : ''}${m.cambio.toFixed(2)}%
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function seleccionarMercado(simbolo) {
+    const m = mercados.find(x => x.simbolo === simbolo);
+    if (m) {
+        document.getElementById('graficaSimbolo').textContent = `${simbolo} — ${m.nombre}`;
+        simboloActivo = simbolo;
+        cargarVelas(simbolo, intervaloActivo);
+    }
+}
+
+// ==============================================
+// DEPÓSITO Y COMPROBANTE
+// ==============================================
+function generarComprobante() {
+    const monto = document.getElementById('montoDep').value;
+    const nombre = document.getElementById('nombreDep').value;
+    if (!monto || monto < 10) { mostrarToast('Ingresa un monto válido'); return; }
+    if (!nombre) { mostrarToast('Ingresa tu nombre'); return; }
+    const codigo = 'ESCA' + Date.now().toString().slice(-8);
+    const fecha = new Date().toLocaleDateString('es-MX', {dateStyle:'full'});
+    document.getElementById('comprobanteArea').innerHTML = `
+        <div class="papelera">
+            <div class="papelera-header">
+                <div class="papelera-tit">ESCALADA FINANCIERA</div>
+                <div class="papelera-sub">Comprobante de Depósito — OXXO Pay</div>
+            </div>
+            <div class="papelera-fila">
+                <span class="papelera-etq">Cliente:</span>
+                <span class="papelera-val">${nombre}</span>
+            </div>
+            <div class="papelera-fila">
+                <span class="papelera-etq">Fecha:</span>
+                <span class="papelera-val">${fecha}</span>
+            </div>
+            <div class="papelera-destacado">
+                <div class="papelera-fila">
+                    <span class="papelera-etq">Monto a Pagar:</span>
+                    <span class="papelera-val" style="font-size:20px">$${Number(monto).toFixed(2)} MXN</span>
+                </div>
+            </div>
+            <div class="papelera-codigo">${codigo}</div>
+            <div style="text-align:center; color:#64748B; font-size:13px; margin:10px 0;">
+                Presenta este código en cualquier OXXO
+            </div>
+            <div class="papelera-pie">
+                Escalada Financiera S.A. de C.V.<br>
+                Este comprobante es válido por 24 horas.
+            </div>
+        </div>
+        <button class="btn-primario" style="margin-top:20px;" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+    `;
+    document.getElementById('comprobanteArea').classList.remove('oculto');
+    mostrarToast('¡Comprobante generado!');
+}
+
+function mostrarToast(texto) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = texto;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+}
+
+// ==============================================
+// 📊 GRÁFICA DE VELAS JAPONESAS
+// ==============================================
+let grafica = null, serieVelas = null, simboloActivo = "XAU/USD", intervaloActivo = "15min";
+
+function inicializarGrafica() {
+    const contenedor = document.getElementById('graficaContenedor');
+    if (!contenedor) return;
+    grafica = LightweightCharts.createChart(contenedor, {
+        layout: { background: { color: '#0A0F1A' }, textColor: '#94A3B8' },
+        grid: { vertLines: { color: '#1E293B' }, horzLines: { color: '#1E293B' } },
+        crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: '#C8A951' }, horzLine: { color: '#C8A951' } },
+        priceScale: { borderColor: '#334155' },
+        timeScale: { borderColor: '#334155', timeVisible: true },
+        width: contenedor.clientWidth, height: 320,
+    });
+    serieVelas = grafica.addCandlestickSeries({
+        upColor: '#00C076', downColor: '#FF4757',
+        borderUpColor: '#00C076', borderDownColor: '#FF4757',
+        wickUpColor: '#00C076', wickDownColor: '#FF4757',
+    });
+    window.addEventListener('resize', () => grafica.applyOptions({ width: contenedor.clientWidth }));
+    cargarVelas(simboloActivo, intervaloActivo);
+}
+
+function mapearIntervalo(t) { return { '15min':'15min','1h':'1h','4h':'4h','1day':'1day' }[t] || '15min'; }
+
+async function cargarVelas(simbolo, tBtn) {
+    if (!serieVelas) return;
     try {
-        // Convertir formato: BTCUSDT → BTC/USD (Twelve Data usa barra)
-        const simboloTwelve = simbolo.replace("USDT", "/USD").replace("USDC", "/USD");
-        
-        const url = `${CONFIG_API.urlBase}${CONFIG_API.endpoints.precio}?symbol=${simboloTwelve}&apikey=${CONFIG_API.apiKey}`;
-        
-        const respuesta = await fetch(url);
-        if (!respuesta.ok) throw new Error(`Error: ${respuesta.status}`);
-        const datos = await respuesta.json();
+        const res = await fetch(`/api/velas?simbolo=${encodeURIComponent(simbolo)}&intervalo=${mapearIntervalo(tBtn)}`);
+        const datos = await res.json();
+        if (!datos.exito || !datos.velas?.length) return cargarVelasSimuladas();
+        serieVelas.setData(datos.velas.map(v => ({
+            time: v.datetime?.split(' ')[0] || v.time,
+            open: +v.open, high: +v.high, low: +v.low, close: +v.close
+        })).reverse());
+        grafica.timeScale().fitContent();
+    } catch { cargarVelasSimuladas(); }
+}
 
-        if (datos.code === 400 || datos.message) throw new Error(datos.message || "Símbolo no encontrado");
-
-        // ✅ Extraer datos del formato de Twelve Data
-        const precio = parseFloat(datos.price);
-        const cambio = parseFloat(datos.change_percent);
-
-        if (!precio) throw new Error("Precio no disponible");
-
-        ESTADO.precioActual = precio;
-        ESTADO.cambio24h = cambio || 0;
-
-        // Actualizar interfaz
-        const precioEl = document.getElementById('precioActual');
-        const cambioEl = document.getElementById('cambioActual');
-        
-        precioEl.textContent = precio.toLocaleString('en-US', { minimumFractionDigits: 2 });
-        precioEl.className = `precio-actual ${ESTADO.cambio24h >= 0 ? 'precio-verde' : 'precio-rojo'}`;
-        
-        cambioEl.textContent = `${ESTADO.cambio24h >= 0 ? '+' : ''}${ESTADO.cambio24h.toFixed(2)}%`;
-        cambioEl.className = `simbolo-cambio ${ESTADO.cambio24h >= 0 ? 'cambio-verde' : 'cambio-rojo'}`;
-
-        recalcularTotales();
-        
-        // 🔄 Actualizar cada 10s (Twelve Data recomienda no muy rápido)
-        setTimeout(() => cargarPrecioDesdeTuAPI(simbolo), 10000);
-
-    } catch (error) {
-        console.error("❌ Error Twelve Data (precio):", error);
-        mostrarToast("Error cargando precio — Reintentando...", "error");
-        setTimeout(() => cargarPrecioDesdeTuAPI(simbolo), 15000);
+function cargarVelasSimuladas() {
+    const velas = []; let precio = 1900; const hoy = new Date();
+    for (let i = 50; i >= 0; i--) {
+        const f = new Date(hoy); f.setDate(f.getDate() - i);
+        const o = precio, c = precio + (Math.random() - 0.5) * 10;
+        velas.push({ 
+            time: f.toISOString().split('T')[0], 
+            open: +o.toFixed(2), 
+            high: +(Math.max(o,c)+Math.random()*5).toFixed(2), 
+            low: +(Math.min(o,c)-Math.random()*5).toFixed(2), 
+            close: +c.toFixed(2) 
+        });
+        precio = c;
     }
+    serieVelas.setData(velas);
+    grafica.timeScale().fitContent();
 }
 
-// =========================================================
-// 🕯️ TRAER VELAS JAPONESAS DESDE TWELVE DATA
-// =========================================================
-async function cargarVelasDesdeTuAPI(simbolo, intervalo) {
-    try {
-        // Convertir intervalo: 15m → 15min, 1h → 1h, 1d → 1day
-        const mapaIntervalos = {
-            "1m": "1min", "5m": "5min", "15m": "15min",
-            "30m": "30min", "1h": "1h", "4h": "4h", "1d": "1day"
-        };
-        const intervaloTwelve = mapaIntervalos[intervalo] || "5min";
-        
-        // Convertir símbolo: BTCUSDT → BTC/USD
-        const simboloTwelve = simbolo.replace("USDT", "/USD").replace("USDC", "/USD");
-        
-        const url = `${CONFIG_API.urlBase}${CONFIG_API.endpoints.velas}?symbol=${simboloTwelve}&interval=${intervaloTwelve}&outputsize=50&apikey=${CONFIG_API.apiKey}`;
-        
-        const respuesta = await fetch(url);
-        if (!respuesta.ok) throw new Error(`Error velas: ${respuesta.status}`);
-        const datos = await respuesta.json();
-
-        if (!datos.values || datos.code) throw new Error(datos.message || "Sin datos de velas");
-
-        // ✅ Convertir al formato de la gráfica Lightweight Charts
-        const listaVelas = datos.values.map(v => ({
-            time: new Date(v.datetime).getTime() / 1000,
-            open: parseFloat(v.open),
-            high: parseFloat(v.high),
-            low: parseFloat(v.low),
-            close: parseFloat(v.close)
-        })).reverse(); // Twelve Data trae del más reciente al más antiguo → invertir
-
-        ESTADO.serieVelas?.setData(listaVelas);
-        ESTADO.grafica?.timeScale().fitContent();
-
-        // Línea de precio actual
-        if (ESTADO.precioActual) {
-            ESTADO.serieVelas?.createPriceLine({
-                price: ESTADO.precioActual,
-                color: '#F0B90B',
-                lineWidth: 2,
-                lineStyle: LightweightCharts.LineStyle.Dashed,
-                axisLabelVisible: true,
-                title: 'Actual'
-            });
-        }
-
-    } catch (error) {
-        console.error("❌ Error Twelve Data (velas):", error);
-        mostrarToast("No se pudieron cargar las velas", "error");
+document.addEventListener('click', e => {
+    const btn = e.target.closest('.tiempo-btn');
+    if (btn) {
+        document.querySelectorAll('.tiempo-btn').forEach(b => b.classList.remove('activo'));
+        btn.classList.add('activo');
+        intervaloActivo = btn.dataset.tiempo;
+        cargarVelas(simboloActivo, intervaloActivo);
     }
-}
+});
 
-// =========================================================
-// 🔄 REEMPLAZA LAS LLAMADAS EN EL CÓDIGO PRINCIPAL
-// =========================================================
-// Busca en tu código y CAMBIA:
-// ❌ cargarPrecioBinance(ESTADO.simbolo)
-// ✅ cargarPrecioDesdeTuAPI(ESTADO.simbolo)
-//
-// ❌ cargarVelasBinance(ESTADO.simbolo, ESTADO.intervalo)
-// ✅ cargarVelasDesdeTuAPI(ESTADO.simbolo, ESTADO.intervalo)
-
-// =========================================================
-// 📋 ACTUALIZAR FUNCIÓN DE SELECCIÓN DE MERCADO
-// =========================================================
-function seleccionarMercado(simbolo, nombre) {
-    ESTADO.simbolo = simbolo;
-    ESTADO.nombrePar = nombre;
-    
-    // Actualizar UI
-    document.getElementById('simboloActual').textContent = simbolo.replace("USDT", "/USDT");
-    
-    // Cargar datos desde TWELVE DATA
-    cargarPrecioDesdeTuAPI(simbolo);
-    cargarVelasDesdeTuAPI(simbolo, ESTADO.intervalo);
-    generarLibroOrdenes();
-    mostrarToast(`✅ Seleccionado: ${simbolo}`);
-}
+document.addEventListener('DOMContentLoaded', () => {
+    renderizarMercados();
+    setTimeout(inicializarGrafica, 500);
+});
+</script>
+</body>
+</html>
