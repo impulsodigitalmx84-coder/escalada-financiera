@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="es-MX">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escalada Financiera</title>
+    <!-- Fuente profesional -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<!-- 📊 GRÁFICAS DE VELAS JAPONESAS — TradingView Lightweight Charts -->
-<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.min.js"></script>
-</head>
-        <style>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- 📊 LIBRERÍA DE VELAS JAPONESAS -->
+    <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.min.js"></script>
+    <style>
 :root {
     --fondo-principal: #050C18;
     --fondo-tarjeta: #0F172A;
@@ -43,7 +46,7 @@ body {
 button { border: none; background: none; color: inherit; cursor: pointer; }
 
 .top-bar {
-    padding: 16px;
+    padding: 20px 16px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -119,6 +122,53 @@ button { border: none; background: none; color: inherit; cursor: pointer; }
 }
 .cat-icon { font-size: 22px; margin-bottom: 6px; }
 .cat-nom { font-size: 13px; font-weight: 600; }
+
+/* 📊 GRÁFICA DE VELAS JAPONESAS */
+.grafica-seccion {
+    margin: 0 16px 20px;
+    background: var(--fondo-tarjeta);
+    border-radius: 12px;
+    border: 1px solid var(--borde);
+    padding: 16px;
+}
+.grafica-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.grafica-simbolo {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dorado);
+}
+.grafica-tiempo {
+    display: flex;
+    gap: 6px;
+}
+.tiempo-btn {
+    padding: 6px 12px;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--texto-secundario);
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+.tiempo-btn.activo {
+    background: var(--dorado);
+    color: #000;
+    border-color: var(--dorado);
+}
+.grafica-contenedor {
+    width: 100%;
+    height: 320px;
+    border-radius: 8px;
+    background: #0A0F1A;
+}
 
 .seccion-tit {
     font-size: 14px;
@@ -383,423 +433,330 @@ button { border: none; background: none; color: inherit; cursor: pointer; }
     .papelera, .papelera * { visibility: visible; }
     .papelera { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; }
 }
-
-/* 📊 GRÁFICA DE VELAS JAPONESAS */
-.grafica-seccion {
-  margin: 16px;
-  background: var(--fondo-tarjeta);
-  border-radius: 12px;
-  border: 1px solid var(--borde);
-  padding: 16px;
-}
-
-.grafica-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.grafica-simbolo {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--dorado);
-}
-
-.grafica-tiempo {
-  display: flex;
-  gap: 6px;
-}
-
-.tiempo-btn {
-  padding: 6px 12px;
-  background: transparent;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--texto-secundario);
-  border: 1px solid transparent;
-  transition: all 0.2s;
-}
-
-.tiempo-btn.activo {
-  background: var(--dorado);
-  color: #000;
-  border-color: var(--dorado);
-}
-
-.tiempo-btn:active {
-  transform: scale(0.95);
-}
-
-.grafica-contenedor {
-  width: 100%;
-  height: 320px;
-  border-radius: 8px;
-  background: #0A0F1A;
-}
- 
     </style>
 </head>
 <body>
-
 <div id="pagInicio">
     <div class="top-bar">
         <button class="icon-btn">☰</button>
         <div class="saldo-header">
             <div class="saldo-tit">Saldo Disponible</div>
-            <div class="saldo-val" id="saldoTop">$10,000.00</div>
+            <div class="saldo-val" id="saldo">$10,000.00</div>
         </div>
-        <button class="icon-btn" onclick="irDeposito()">+</button>
+        <button class="icon-btn" onclick="irDeposito()">💰</button>
     </div>
 
     <div class="search-bar">
         <span class="search-icon">🔍</span>
-        <input type="text" class="search-input" placeholder="Buscar mercados...">
+        <input type="text" class="search-input" placeholder="Buscar mercado..." id="buscar" oninput="filtrarMercados()">
     </div>
 
     <div class="categorias">
-        <button class="cat-btn activo"><div class="cat-icon">🔥</div><div class="cat-nom">Populares</div></button>
-        <button class="cat-btn"><div class="cat-icon">📊</div><div class="cat-nom">Índices</div></button>
-        <button class="cat-btn"><div class="cat-icon">💱</div><div class="cat-nom">Forex</div></button>
-        <button class="cat-btn"><div class="cat-icon">📈</div><div class="cat-nom">Acciones</div></button>
-        <button class="cat-btn"><div class="cat-icon">⛏️</div><div class="cat-nom">Materias</div></button>
-        <button class="cat-btn"><div class="cat-icon">🪙</div><div class="cat-nom">Cripto</div></button>
+        <button class="cat-btn activo" data-cat="todos" onclick="cambiarCat(this)">
+            <div class="cat-icon">🔥</div>
+            <div class="cat-nom">Populares</div>
+        </button>
+        <button class="cat-btn" data-cat="indices" onclick="cambiarCat(this)">
+            <div class="cat-icon">🏛️</div>
+            <div class="cat-nom">Índices</div>
+        </button>
+        <button class="cat-btn" data-cat="forex" onclick="cambiarCat(this)">
+            <div class="cat-icon">💱</div>
+            <div class="cat-nom">Forex</div>
+        </button>
+        <button class="cat-btn" data-cat="materias" onclick="cambiarCat(this)">
+            <div class="cat-icon">⛏️</div>
+            <div class="cat-nom">Materias</div>
+        </button>
+        <button class="cat-btn" data-cat="acciones" onclick="cambiarCat(this)">
+            <div class="cat-icon">📈</div>
+            <div class="cat-nom">Acciones</div>
+        </button>
+        <button class="cat-btn" data-cat="cripto" onclick="cambiarCat(this)">
+            <div class="cat-icon">🪙</div>
+            <div class="cat-nom">Cripto</div>
+        </button>
+    </div>
+
+    <!-- 📊 GRÁFICA DE VELAS JAPONESAS - VISIBLE DESDE EL INICIO -->
+    <div class="grafica-seccion" id="seccionGrafica">
+        <div class="grafica-header">
+            <div class="grafica-simbolo" id="graficaSimbolo">XAU/USD — Oro</div>
+            <div class="grafica-tiempo">
+                <button class="tiempo-btn activo" data-tiempo="15min">15m</button>
+                <button class="tiempo-btn" data-tiempo="1h">1H</button>
+                <button class="tiempo-btn" data-tiempo="4h">4H</button>
+                <button class="tiempo-btn" data-tiempo="1day">1D</button>
+            </div>
+        </div>
+        <div class="grafica-contenedor" id="graficaContenedor"></div>
     </div>
 
     <div class="seccion-tit">Mercados más activos</div>
-    <div class="lista-mercados">
-        <div class="mercado-item">
-            <div><div class="mercado-nom">XAU/USD</div><div class="mercado-desc">Oro</div></div>
-            <div class="mercado-precios"><div class="precio-compra">1,907.80</div><div class="cambio-pos">▲ 0.42%</div></div>
-        </div>
-        <div class="mercado-item">
-            <div><div class="mercado-nom">EUR/USD</div><div class="mercado-desc">Euro/Dólar</div></div>
-            <div class="mercado-precios"><div class="precio-compra">1.0875</div><div class="cambio-neg">▼ 0.15%</div></div>
-        </div>
-        <div class="mercado-item">
-            <div><div class="mercado-nom">BTC/USD</div><div class="mercado-desc">Bitcoin</div></div>
-            <div class="mercado-precios"><div class="precio-compra">68,450.25</div><div class="cambio-pos">▲ 1.23%</div></div>
-        </div>
+    <div class="lista-mercados" id="listaMercados">
+        <!-- Los mercados se cargan con JS -->
     </div>
 </div>
 
 <div id="pagDeposito" class="oculto">
     <div class="op-header">
-        <button onclick="volverInicio()">←</button>
+        <button class="icon-btn" onclick="irInicio()">←</button>
         <div class="op-tit">Depositar Fondos</div>
         <div></div>
     </div>
-
+    <div class="form-section">
+        <div class="form-tit">Método de Pago</div>
+        <div class="metodo-pago" onclick="seleccionarPago('oxxo')">
+            <div class="metodo-icon">🏪</div>
+            <div class="metodo-info">
+                <div class="metodo-nom">OXXO Pay</div>
+                <div class="metodo-desc">Paga en efectivo en cualquier OXXO</div>
+            </div>
+            <div>▶</div>
+        </div>
+    </div>
     <div class="form-section">
         <div class="form-tit">Datos del Depósito</div>
         <div class="input-group">
-            <label>Nombre de quien deposita</label>
-            <input type="text" id="nombreDepositante" placeholder="Nombre completo">
+            <label>Monto a depositar ($)</label>
+            <input type="number" id="montoDep" placeholder="Ej. 500" min="10">
         </div>
         <div class="input-group">
-            <label>Correo electrónico</label>
-            <input type="email" id="emailDepositante" placeholder="correo@ejemplo.com">
+            <label>Tu Nombre Completo</label>
+            <input type="text" id="nombreDep" placeholder="Tu nombre">
         </div>
-        <div class="input-group">
-            <label>Teléfono</label>
-            <input type="tel" id="telefonoDepositante" placeholder="+52 55 1234 5678">
-        </div>
-        <div class="input-group">
-            <label>Monto a depositar ($ MXN)</label>
-            <input type="number" id="montoDep" min="100" step="100" placeholder="Mínimo $100 MXN">
-        </div>
+        <button class="btn-primario" onclick="generarComprobante()">Generar Comprobante</button>
+        <button class="btn-secundario" onclick="irInicio()">Cancelar</button>
     </div>
-
-    <div class="form-section">
-        <div class="form-tit">Métodos de Pago — México 🇲🇽</div>
-    </div>
-
-    <div id="metodosPago">
-        <div class="metodo-pago" onclick="seleccionarMetodo('oxxo')">
-            <div class="metodo-icon">🏪</div>
-            <div class="metodo-info">
-                <div class="metodo-nom">OXXO Pay (Digital Femsa)</div>
-                <div class="metodo-desc">Referencia + Código de Barras</div>
-            </div>
-            <span>›</span>
-        </div>
-        <div class="metodo-pago" onclick="seleccionarMetodo('transferencia')">
-            <div class="metodo-icon">🏦</div>
-            <div class="metodo-info">
-                <div class="metodo-nom">Transferencia SPEI</div>
-                <div class="metodo-desc">Cuenta: BCMRMXMMPYM</div>
-            </div>
-            <span>›</span>
-        </div>
-    </div>
-
-    <div id="papeleraDeposito" class="form-section oculto">
-        <div class="papelera">
-            <div class="papelera-header">
-                <div class="papelera-tit">ESCALADA FINANCIERA</div>
-                <div class="papelera-sub">COMPROBANTE DE DEPÓSITO</div>
-            </div>
-            
-            <div class="papelera-fila">
-                <span class="papelera-etq">Cuenta a depositar:</span>
-                <span class="papelera-val">BCMRMXMMPYM</span>
-            </div>
-            <div class="papelera-fila">
-                <span class="papelera-etq">Nombre del depositante:</span>
-                <span class="papelera-val" id="papeleraNombre">—</span>
-            </div>
-            <div class="papelera-fila">
-                <span class="papelera-etq">Método de pago:</span>
-                <span class="papelera-val" id="papeleraMetodo">—</span>
-            </div>
-            <div class="papelera-fila">
-                <span class="papelera-etq">Fecha y hora:</span>
-                <span class="papelera-val" id="papeleraFecha">—</span>
-            </div>
-            
-            <div class="papelera-destacado">
-                <div class="papelera-fila" style="border-bottom:none; padding:0;">
-                    <span class="papelera-etq" style="font-weight:600; font-size:16px;">MONTO A PAGAR:</span>
-                    <span class="papelera-val" id="papeleraMonto" style="font-size:18px; color:#2563EB;">—</span>
-                </div>
-            </div>
-            
-            <div class="papelera-codigo" id="papeleraReferencia">—</div>
-            <div class="papelera-imagen" id="codigoBarrasContenedor"></div>
-            
-            <div class="papelera-fila">
-                <span class="papelera-etq">Estado:</span>
-                <span class="papelera-val" style="color:green;">PENDIENTE DE CONFIRMACIÓN</span>
-            </div>
-            
-            <div class="papelera-pie">
-                ⚠️ Conserva este comprobante como respaldo de tu operación.<br>
-                El depósito se acreditará una vez confirmado el pago.<br>
-                Escalada Financiera · Cuenta: BCMRMXMMPYM
-            </div>
-        </div>
-        
-        <button class="btn-primario" style="background:#2563EB; color:#fff; margin-top:16px;" onclick="window.print()">🖨️ Imprimir Comprobante</button>
-        <button class="btn-secundario" onclick="copiarTodo()">📋 Copiar Datos</button>
-    </div>
+    <div id="comprobanteArea" class="oculto"></div>
 </div>
 
 <div class="bottom-nav">
-    <button class="nav-item activo" onclick="volverInicio()"><span>📈</span><span>Mercados</span></button>
-    <button class="nav-item" onclick="irDeposito()"><span>💰</span><span>Depositar</span></button>
-    <button class="nav-item"><span>💳</span><span>Retirar</span></button>
-    <button class="nav-item"><span>📊</span><span>Cuenta</span></button>
+    <div class="nav-item activo" onclick="cambiarPagina('inicio')">
+        <span>🏠</span>
+        <span>Inicio</span>
+    </div>
+    <div class="nav-item" onclick="cambiarPagina('mercados')">
+        <span>📊</span>
+        <span>Mercados</span>
+    </div>
+    <div class="nav-item" onclick="cambiarPagina('operar')">
+        <span>📈</span>
+        <span>Operar</span>
+    </div>
+    <div class="nav-item" onclick="cambiarPagina('cuenta')">
+        <span>👤</span>
+        <span>Cuenta</span>
+    </div>
 </div>
 
 <script>
-let referenciaActual = "";
+// ==============================================
+// DATOS DE MERCADOS
+// ==============================================
+const mercados = [
+    { simbolo: "XAU/USD", nombre: "Oro", cat: "materias", precio: 1907.80, cambio: 0.42 },
+    { simbolo: "EUR/USD", nombre: "Euro/Dólar", cat: "forex", precio: 1.0875, cambio: -0.15 },
+    { simbolo: "BTC/USD", nombre: "Bitcoin", cat: "cripto", precio: 68450.25, cambio: 3.25 },
+    { simbolo: "USD/MXN", nombre: "Dólar/Peso", cat: "forex", precio: 20.15, cambio: 0.30 },
+    { simbolo: "XAG/USD", nombre: "Plata", cat: "materias", precio: 23.45, cambio: -0.20 },
+    { simbolo: "SPX", nombre: "S&P 500", cat: "indices", precio: 5820.50, cambio: 1.25 },
+    { simbolo: "AAPL", nombre: "Apple", cat: "acciones", precio: 225.30, cambio: 0.85 },
+    { simbolo: "ETH/USD", nombre: "Ethereum", cat: "cripto", precio: 2850.75, cambio: 2.10 },
+];
 
-function mostrarToast(mensaje, tipo="exito") {
-    const t = document.createElement("div");
-    t.className = "toast";
-    t.style.borderLeft = tipo==="exito"?"3px solid #00C48C":"3px solid #FF5252";
-    t.textContent = mensaje;
-    document.body.appendChild(t);
-    setTimeout(()=>t.remove(),3500);
+// ==============================================
+// NAVEGACIÓN BÁSICA
+// ==============================================
+function cambiarPagina(pag) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('activo'));
+    event.target.closest('.nav-item').classList.add('activo');
+    if (pag === 'inicio') { irInicio(); }
+    else { mostrarToast('Sección en desarrollo'); }
 }
 
-function volverInicio() {
-    document.getElementById("pagDeposito").classList.add("oculto");
-    document.getElementById("pagInicio").classList.remove("oculto");
+function irInicio() {
+    document.getElementById('pagInicio').classList.remove('oculto');
+    document.getElementById('pagDeposito').classList.add('oculto');
+    document.querySelectorAll('.nav-item').forEach((n,i) => n.classList.toggle('activo', i === 0));
 }
 
 function irDeposito() {
-    document.getElementById("pagInicio").classList.add("oculto");
-    document.getElementById("pagDeposito").classList.remove("oculto");
-    document.getElementById("papeleraDeposito").classList.add("oculto");
+    document.getElementById('pagInicio').classList.add('oculto');
+    document.getElementById('pagDeposito').classList.remove('oculto');
 }
 
-async function seleccionarMetodo(metodo) {
-    const nombre = document.getElementById("nombreDepositante").value.trim();
-    const monto = document.getElementById("montoDep").value;
-    const email = document.getElementById("emailDepositante").value || "cliente@escaladafinanciera.com";
-    const telefono = document.getElementById("telefonoDepositante").value || "+525512345678";
+// ==============================================
+// CATEGORÍAS Y FILTROS
+// ==============================================
+let catActiva = 'todos';
+function cambiarCat(btn) {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('activo'));
+    btn.classList.add('activo');
+    catActiva = btn.dataset.cat;
+    renderizarMercados();
+}
 
-    if (!nombre) return mostrarToast("Ingresa el nombre de quien deposita","error");
-    if (!monto || parseFloat(monto) < 100) return mostrarToast("El monto mínimo es $100 MXN","error");
+function filtrarMercados() { renderizarMercados(); }
 
-    if (metodo === "oxxo") {
-        mostrarToast("🔄 Generando referencia OXXO...","info");
-        
-        try {
-            const res = await fetch("/api/crear-pago-oxxo", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    monto: parseFloat(monto),
-                    nombre_cliente: nombre,
-                    email, telefono
-                })
-            });
+function renderizarMercados() {
+    const busqueda = document.getElementById('buscar').value.toLowerCase();
+    const lista = document.getElementById('listaMercados');
+    const filtrados = mercados.filter(m => 
+        (catActiva === 'todos' || m.cat === catActiva) &&
+        (m.simbolo.toLowerCase().includes(busqueda) || m.nombre.toLowerCase().includes(busqueda))
+    );
+    lista.innerHTML = filtrados.map(m => `
+        <div class="mercado-item" data-simbolo="${m.simbolo}" onclick="seleccionarMercado('${m.simbolo}')">
+            <div>
+                <div class="mercado-nom">${m.simbolo}</div>
+                <div class="mercado-desc">${m.nombre}</div>
+            </div>
+            <div class="mercado-precios">
+                <div class="precio-compra">${m.precio.toFixed(2)}</div>
+                <div class="${m.cambio >= 0 ? 'cambio-pos' : 'cambio-neg'}">
+                    ${m.cambio >= 0 ? '+' : ''}${m.cambio.toFixed(2)}%
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
 
-            const datos = await res.json();
-            if (!datos.exito) throw new Error(datos.error || "Error desconocido");
-
-            document.getElementById("papeleraNombre").textContent = nombre;
-            document.getElementById("papeleraMetodo").textContent = "OXXO Pay — Digital Femsa";
-            document.getElementById("papeleraFecha").textContent = new Date().toLocaleString('es-MX');
-            document.getElementById("papeleraMonto").textContent = "$" + parseFloat(monto).toLocaleString('es-MX') + " MXN";
-            document.getElementById("papeleraReferencia").textContent = datos.referencia;
-            
-            const contenedor = document.getElementById("codigoBarrasContenedor");
-            contenedor.innerHTML = `
-                <p style="font-size:12px;color:#666;margin-bottom:8px;">📸 Código de Barras (escanea en caja OXXO)</p>
-                <img src="${datos.codigo_barras_url}" alt="Código de Barras OXXO" style="max-width:280px;border:1px solid #ccc;padding:8px;background:#fff;">
-                <p style="font-size:11px;color:#888;margin-top:8px;">Válido hasta: ${datos.expira}</p>
-            `;
-            
-            referenciaActual = datos.referencia;
-            document.getElementById("papeleraDeposito").classList.remove("oculto");
-            mostrarToast("✅ Referencia generada con éxito!","exito");
-
-        } catch (err) {
-            mostrarToast("❌ " + err.message,"error");
-        }
-
-    } else {
-        const fecha = new Date();
-        const fechaStr = fecha.toLocaleDateString('es-MX', {day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + 
-                         fecha.toLocaleTimeString('es-MX', {hour:'2-digit',minute:'2-digit'});
-        referenciaActual = "REF-" + fecha.getFullYear() + 
-                          (fecha.getMonth()+1).toString().padStart(2,'0') + 
-                          fecha.getDate().toString().padStart(2,'0') + "-" +
-                          Date.now().toString(36).toUpperCase();
-        
-        document.getElementById("papeleraNombre").textContent = nombre;
-        document.getElementById("papeleraMetodo").textContent = "Transferencia SPEI";
-        document.getElementById("papeleraFecha").textContent = fechaStr;
-        document.getElementById("papeleraMonto").textContent = "$" + parseFloat(monto).toLocaleString('es-MX') + " MXN";
-        document.getElementById("papeleraReferencia").textContent = referenciaActual;
-        document.getElementById("codigoBarrasContenedor").innerHTML = "";
-        
-        document.getElementById("papeleraDeposito").classList.remove("oculto");
-        mostrarToast("✅ Comprobante generado","exito");
+function seleccionarMercado(simbolo) {
+    const m = mercados.find(x => x.simbolo === simbolo);
+    if (m) {
+        document.getElementById('graficaSimbolo').textContent = `${simbolo} — ${m.nombre}`;
+        simboloActivo = simbolo;
+        cargarVelas(simbolo, intervaloActivo);
     }
 }
 
-function copiarTodo() {
-    const texto = `
-═══════════════════════════════════
-      ESCALADA FINANCIERA
-   COMPROBANTE DE DEPÓSITO
-═══════════════════════════════════
-
-Cuenta a depositar: BCMRMXMMPYM
-Nombre: ${document.getElementById("papeleraNombre").textContent}
-Método: ${document.getElementById("papeleraMetodo").textContent}
-Fecha: ${document.getElementById("papeleraFecha").textContent}
-
-MONTO: ${document.getElementById("papeleraMonto").textContent}
-
-REFERENCIA: ${referenciaActual}
-
-═══════════════════════════════════
-Conserva este comprobante
-Estado: PENDIENTE DE CONFIRMACIÓN
-═══════════════════════════════════
-    `.trim();
-    navigator.clipboard.writeText(texto).then(()=>mostrarToast("✅ Copiado al portapapeles","exito"));
-}// ==============================================
-// 📊 GRÁFICA DE VELAS JAPONESAS — TWELVE DATA
 // ==============================================
-let grafica = null;
-let serieVelas = null;
-let simboloActivo = "XAU/USD";
-let intervaloActivo = "15min";
+// DEPÓSITO Y COMPROBANTE
+// ==============================================
+function generarComprobante() {
+    const monto = document.getElementById('montoDep').value;
+    const nombre = document.getElementById('nombreDep').value;
+    if (!monto || monto < 10) { mostrarToast('Ingresa un monto válido'); return; }
+    if (!nombre) { mostrarToast('Ingresa tu nombre'); return; }
+    const codigo = 'ESCA' + Date.now().toString().slice(-8);
+    const fecha = new Date().toLocaleDateString('es-MX', {dateStyle:'full'});
+    document.getElementById('comprobanteArea').innerHTML = `
+        <div class="papelera">
+            <div class="papelera-header">
+                <div class="papelera-tit">ESCALADA FINANCIERA</div>
+                <div class="papelera-sub">Comprobante de Depósito — OXXO Pay</div>
+            </div>
+            <div class="papelera-fila">
+                <span class="papelera-etq">Cliente:</span>
+                <span class="papelera-val">${nombre}</span>
+            </div>
+            <div class="papelera-fila">
+                <span class="papelera-etq">Fecha:</span>
+                <span class="papelera-val">${fecha}</span>
+            </div>
+            <div class="papelera-destacado">
+                <div class="papelera-fila">
+                    <span class="papelera-etq">Monto a Pagar:</span>
+                    <span class="papelera-val" style="font-size:20px">$${Number(monto).toFixed(2)} MXN</span>
+                </div>
+            </div>
+            <div class="papelera-codigo">${codigo}</div>
+            <div style="text-align:center; color:#64748B; font-size:13px; margin:10px 0;">
+                Presenta este código en cualquier OXXO
+            </div>
+            <div class="papelera-pie">
+                Escalada Financiera S.A. de C.V.<br>
+                Este comprobante es válido por 24 horas.
+            </div>
+        </div>
+        <button class="btn-primario" style="margin-top:20px;" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+    `;
+    document.getElementById('comprobanteArea').classList.remove('oculto');
+    mostrarToast('¡Comprobante generado!');
+}
+
+function mostrarToast(texto) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = texto;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+}
+
+// ==============================================
+// 📊 GRÁFICA DE VELAS JAPONESAS
+// ==============================================
+let grafica = null, serieVelas = null, simboloActivo = "XAU/USD", intervaloActivo = "15min";
 
 function inicializarGrafica() {
-  const contenedor = document.getElementById('graficaContenedor');
-  if (!contenedor) return;
-
-  grafica = LightweightCharts.createChart(contenedor, {
-    layout: { background: { color: '#0A0F1A' }, textColor: '#94A3B8' },
-    grid: { vertLines: { color: '#1E293B' }, horzLines: { color: '#1E293B' } },
-    crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: '#C8A951' }, horzLine: { color: '#C8A951' } },
-    priceScale: { borderColor: '#334155' },
-    timeScale: { borderColor: '#334155', timeVisible: true },
-    width: contenedor.clientWidth, height: 320,
-  });
-
-  serieVelas = grafica.addCandlestickSeries({
-    upColor: '#00C076', downColor: '#FF4757',
-    borderUpColor: '#00C076', borderDownColor: '#FF4757',
-    wickUpColor: '#00C076', wickDownColor: '#FF4757',
-  });
-
-  window.addEventListener('resize', () => grafica.applyOptions({ width: contenedor.clientWidth }));
-  cargarVelas(simboloActivo, intervaloActivo);
+    const contenedor = document.getElementById('graficaContenedor');
+    if (!contenedor) return;
+    grafica = LightweightCharts.createChart(contenedor, {
+        layout: { background: { color: '#0A0F1A' }, textColor: '#94A3B8' },
+        grid: { vertLines: { color: '#1E293B' }, horzLines: { color: '#1E293B' } },
+        crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color: '#C8A951' }, horzLine: { color: '#C8A951' } },
+        priceScale: { borderColor: '#334155' },
+        timeScale: { borderColor: '#334155', timeVisible: true },
+        width: contenedor.clientWidth, height: 320,
+    });
+    serieVelas = grafica.addCandlestickSeries({
+        upColor: '#00C076', downColor: '#FF4757',
+        borderUpColor: '#00C076', borderDownColor: '#FF4757',
+        wickUpColor: '#00C076', wickDownColor: '#FF4757',
+    });
+    window.addEventListener('resize', () => grafica.applyOptions({ width: contenedor.clientWidth }));
+    cargarVelas(simboloActivo, intervaloActivo);
 }
 
-function mapearIntervalo(tiempoBtn) {
-  const mapa = { '15min':'15min','1h':'1h','4h':'4h','1day':'1day' };
-  return mapa[tiempoBtn] || '15min';
-}
+function mapearIntervalo(t) { return { '15min':'15min','1h':'1h','4h':'4h','1day':'1day' }[t] || '15min'; }
 
-async function cargarVelas(simbolo, tiempoBtn) {
-  if (!serieVelas) return;
-  const intervalo = mapearIntervalo(tiempoBtn);
-  try {
-    const res = await fetch(`/api/velas?simbolo=${encodeURIComponent(simbolo)}&intervalo=${intervalo}`);
-    const datos = await res.json();
-    if (!datos.exito || !datos.velas?.length) return cargarVelasSimuladas();
-    const velasFormateadas = datos.velas.map(v => ({
-      time: v.datetime?.split(' ')[0] || v.time,
-      open: parseFloat(v.open), high: parseFloat(v.high), low: parseFloat(v.low), close: parseFloat(v.close)
-    })).reverse();
-    serieVelas.setData(velasFormateadas);
-    grafica.timeScale().fitContent();
-  } catch { cargarVelasSimuladas(); }
+async function cargarVelas(simbolo, tBtn) {
+    if (!serieVelas) return;
+    try {
+        const res = await fetch(`/api/velas?simbolo=${encodeURIComponent(simbolo)}&intervalo=${mapearIntervalo(tBtn)}`);
+        const datos = await res.json();
+        if (!datos.exito || !datos.velas?.length) return cargarVelasSimuladas();
+        serieVelas.setData(datos.velas.map(v => ({
+            time: v.datetime?.split(' ')[0] || v.time,
+            open: +v.open, high: +v.high, low: +v.low, close: +v.close
+        })).reverse());
+        grafica.timeScale().fitContent();
+    } catch { cargarVelasSimuladas(); }
 }
 
 function cargarVelasSimuladas() {
-  const velas = []; let precio = 1900; const hoy = new Date();
-  for (let i = 50; i >= 0; i--) {
-    const fecha = new Date(hoy); fecha.setDate(fecha.getDate() - i);
-    const variacion = (Math.random() - 0.5) * 10;
-    const open = precio, close = precio + variacion;
-    const high = Math.max(open, close) + Math.random() * 5;
-    const low = Math.min(open, close) - Math.random() * 5;
-    velas.push({
-      time: fecha.toISOString().split('T')[0],
-      open: parseFloat(open.toFixed(2)), high: parseFloat(high.toFixed(2)),
-      low: parseFloat(low.toFixed(2)), close: parseFloat(close.toFixed(2))
-    });
-    precio = close;
-  }
-  serieVelas.setData(velas);
-  grafica.timeScale().fitContent();
+    const velas = []; let precio = 1900; const hoy = new Date();
+    for (let i = 50; i >= 0; i--) {
+        const f = new Date(hoy); f.setDate(f.getDate() - i);
+        const o = precio, c = precio + (Math.random() - 0.5) * 10;
+        velas.push({ 
+            time: f.toISOString().split('T')[0], 
+            open: +o.toFixed(2), 
+            high: +(Math.max(o,c)+Math.random()*5).toFixed(2), 
+            low: +(Math.min(o,c)-Math.random()*5).toFixed(2), 
+            close: +c.toFixed(2) 
+        });
+        precio = c;
+    }
+    serieVelas.setData(velas);
+    grafica.timeScale().fitContent();
 }
 
-document.addEventListener('click', (e) => {
-  const item = e.target.closest('.mercado-item');
-  if (item) {
-    simboloActivo = item.dataset.simbolo;
-    document.getElementById('graficaSimbolo').textContent = simboloActivo;
-    document.getElementById('seccionGrafica').classList.remove('oculto');
-    cargarVelas(simboloActivo, intervaloActivo);
-  }
+document.addEventListener('click', e => {
+    const btn = e.target.closest('.tiempo-btn');
+    if (btn) {
+        document.querySelectorAll('.tiempo-btn').forEach(b => b.classList.remove('activo'));
+        btn.classList.add('activo');
+        intervaloActivo = btn.dataset.tiempo;
+        cargarVelas(simboloActivo, intervaloActivo);
+    }
 });
 
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('.tiempo-btn');
-  if (btn) {
-    document.querySelectorAll('.tiempo-btn').forEach(b => b.classList.remove('activo'));
-    btn.classList.add('activo');
-    intervaloActivo = btn.dataset.tiempo;
-    cargarVelas(simboloActivo, intervaloActivo);
-  }
+document.addEventListener('DOMContentLoaded', () => {
+    renderizarMercados();
+    setTimeout(inicializarGrafica, 500);
 });
-
-document.addEventListener('DOMContentLoaded', () => setTimeout(inicializarGrafica, 300));
-
 </script>
 </body>
 </html>
