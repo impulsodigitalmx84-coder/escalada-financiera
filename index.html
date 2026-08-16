@@ -8,8 +8,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.1/chartjs-chart-financial.min.js"></script>
+    <!-- ✅ LIBRERÍAS OBLIGATORIAS PARA VELAS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.1/dist/chartjs-chart-financial.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
     <style>
 :root {
     --fondo-principal: #0B0E11;
@@ -22,85 +25,40 @@
     --dorado: #F0B90B;
     --dorado-claro: #F8D54E;
     --dorado-oscuro: #B8860B;
-    --dorado-brillo: #FFE55C;
     --verde: #0ECB81;
     --rojo: #F6465D;
     --azul: #1E90FF;
     --azul-banxico: #003366;
     --violeta: #9c59dc;
     --radio: 12px;
-    --transicion: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    --sombra: 0 4px 20px rgba(0,0,0,0.35);
 }
-
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-body { 
-    background: var(--fondo-principal); 
-    color: var(--texto); 
-    min-height: 100vh; 
-    padding-bottom: 85px;
-    font-size: 14px;
-    line-height: 1.6;
-    overflow-x: hidden;
-}
-button { border: none; background: none; color: inherit; cursor: pointer; font-family: inherit; transition: var(--transicion); }
+body { background: var(--fondo-principal); color: var(--texto); min-height: 100vh; padding-bottom: 85px; font-size: 14px; line-height: 1.6; overflow-x: hidden; }
+button { border: none; background: none; color: inherit; cursor: pointer; font-family: inherit; transition: all 0.25s ease; }
 a { text-decoration: none; color: inherit; }
 .oculto { display: none !important; }
 .activo { display: block !important; }
 
-/* ==============================================
-   ✨ DORADO METÁLICO — BIENVENIDA
-   ============================================== */
-@keyframes brilloMetalico {
-    0% { background-position: -200% center; }
-    100% { background-position: 200% center; }
-}
+/* --- DORADO METÁLICO --- */
+@keyframes brillo { 0%{background-position:-200% center} 100%{background-position:200% center} }
 .titulo-dorado-metalico {
-    font-size: 26px;
-    font-weight: 800;
-    background: linear-gradient(90deg, var(--dorado-oscuro) 0%, var(--dorado) 25%, var(--dorado-claro) 40%, var(--dorado-brillo) 50%, var(--dorado-claro) 60%, var(--dorado) 75%, var(--dorado-oscuro) 100%);
+    font-size: 26px; font-weight: 800;
+    background: linear-gradient(90deg, var(--dorado-oscuro) 0%, var(--dorado) 25%, var(--dorado-claro) 50%, var(--dorado) 75%, var(--dorado-oscuro) 100%);
     background-size: 200% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
+    -webkit-background-clip: text; background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 8px rgba(240, 185, 11, 0.4));
-    animation: brilloMetalico 3.5s linear infinite;
-    letter-spacing: 0.5px;
+    filter: drop-shadow(0 0 8px rgba(240,185,11,0.4));
+    animation: brillo 3.5s linear infinite;
     margin-bottom: 8px;
 }
 
-/* ==============================================
-   🔝 BARRA SUPERIOR
-   ============================================== */
-.top-header {
-    background: var(--fondo-secundario);
-    border-bottom: 1px solid var(--borde);
-    padding: 12px 16px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(12px);
-}
-.top-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-.menu-toggle {
-    width: 42px; height: 42px; border-radius: 10px;
-    background: var(--fondo-terciario); display: flex; align-items: center; justify-content: center;
-    font-size: 22px; margin-right: 12px; border: 1px solid transparent;
-}
-.menu-toggle:hover { background: var(--fondo-hover); border-color: var(--dorado); transform: scale(1.05); }
+/* --- BARRA SUPERIOR --- */
+.top-header { background: var(--fondo-secundario); border-bottom: 1px solid var(--borde); padding: 12px 16px; position: sticky; top: 0; z-index: 100; }
+.top-inner { display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 0 auto; }
+.menu-toggle { width: 42px; height: 42px; border-radius: 10px; background: var(--fondo-terciario); display: flex; align-items: center; justify-content: center; font-size: 22px; margin-right: 12px; }
 .logo-area { display: flex; align-items: center; gap: 10px; }
-.logo-icon {
-    width: 36px; height: 36px; background: linear-gradient(135deg, var(--dorado), var(--dorado-claro));
-    border-radius: 10px; display: flex; align-items: center; justify-content: center;
-    color: #000; font-weight: 800; font-size: 18px;
-}
-.logo-text { font-weight: 700; font-size: 16px; background: linear-gradient(90deg, var(--dorado), var(--dorado-claro)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--dorado), var(--dorado-claro)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 800; font-size: 18px; }
+.logo-text { font-weight: 700; font-size: 16px; color: var(--dorado); }
 .perfil-area { display: flex; align-items: center; gap: 14px; }
 .saldo-box { text-align: right; }
 .saldo-etq { font-size: 11px; color: var(--texto-secundario); }
@@ -108,45 +66,39 @@ a { text-decoration: none; color: inherit; }
 .perfil-icon { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--azul), var(--violeta)); display: flex; align-items: center; justify-content: center; font-size: 18px; }
 
 /* --- PANEL LATERAL --- */
-.overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 199; opacity: 0; visibility: hidden; transition: var(--transicion); backdrop-filter: blur(4px); }
+.overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 199; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
 .overlay.activo { opacity: 1; visibility: visible; }
-.panel-lateral { position: fixed; top: 0; left: 0; bottom: 0; width: 320px; max-width: 88vw; background: var(--fondo-secundario); border-right: 1px solid var(--borde); z-index: 200; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; box-shadow: 4px 0 30px rgba(0,0,0,0.5); }
+.panel-lateral { position: fixed; top: 0; left: 0; bottom: 0; width: 320px; max-width: 88vw; background: var(--fondo-secundario); border-right: 1px solid var(--borde); z-index: 200; transform: translateX(-100%); transition: transform 0.3s ease; overflow-y: auto; }
 .panel-lateral.activo { transform: translateX(0); }
-.panel-cerrar { position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 50%; background: var(--fondo-terciario); border: none; display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--texto-secundario); z-index: 10; }
-.panel-cerrar:hover { background: var(--rojo); color: white; }
+.panel-cerrar { position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 50%; background: var(--fondo-terciario); font-size: 16px; color: var(--texto-secundario); }
 .panel-header { padding: 24px 20px 20px; border-bottom: 1px solid var(--borde); background: linear-gradient(135deg, rgba(240,185,11,0.15), rgba(30,144,255,0.1)); }
 .panel-perfil { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
-.panel-avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--azul), var(--violeta)); display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 4px 12px rgba(30,144,255,0.3); }
-.panel-nombre { font-weight: 700; font-size: 16px; margin-bottom: 3px; line-height: 1.4; }
+.panel-avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--azul), var(--violeta)); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+.panel-nombre { font-weight: 700; font-size: 16px; margin-bottom: 3px; }
 .panel-correo { font-size: 12px; color: var(--texto-secundario); }
 .panel-saldo { background: var(--fondo-terciario); padding: 14px; border-radius: 12px; margin-top: 12px; border: 1px solid rgba(240,185,11,0.2); }
 .panel-saldo-etq { font-size: 12px; color: var(--texto-secundario); }
 .panel-saldo-val { font-weight: 800; font-size: 22px; color: var(--dorado); margin-top: 4px; }
 .panel-menu { padding: 20px 16px; }
-.panel-item { display: flex; align-items: center; gap: 14px; padding: 15px 14px; border-radius: 12px; margin-bottom: 6px; transition: var(--transicion); cursor: pointer; font-weight: 500; }
-.panel-item:hover { background: var(--fondo-terciario); transform: translateX(6px); }
+.panel-item { display: flex; align-items: center; gap: 14px; padding: 15px 14px; border-radius: 12px; margin-bottom: 6px; cursor: pointer; }
+.panel-item:hover { background: var(--fondo-terciario); }
 .panel-item i { font-size: 20px; width: 24px; text-align: center; color: var(--dorado); }
-.panel-item span { font-size: 15px; }
 
-/* ==============================================
-   📦 CONTENEDOR
-   ============================================== */
+/* --- CONTENEDOR --- */
 .contenedor { max-width: 1200px; margin: 0 auto; padding: 16px; }
 .pagina { display: none; animation: fadeIn 0.3s ease; }
 .pagina.activa { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-.bienvenida { background: linear-gradient(90deg, rgba(240,185,11,0.12), rgba(30,144,255,0.08)); border: 1px solid rgba(240,185,11,0.25); border-radius: var(--radio); padding: 24px 20px; margin-bottom: 20px; position: relative; overflow: hidden; }
+.bienvenida { background: linear-gradient(90deg, rgba(240,185,11,0.12), rgba(30,144,255,0.08)); border: 1px solid rgba(240,185,11,0.25); border-radius: var(--radio); padding: 24px 20px; margin-bottom: 20px; }
 .bienvenida p { color: var(--texto-secundario); font-size: 15px; line-height: 1.7; }
 .pagina-tit { font-size: 20px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
 .pagina-tit i { color: var(--dorado); }
 
-/* ==============================================
-   📊 GRÁFICA BINANCE INTEGRADA
-   ============================================== */
-.grafica-contenedor { background: var(--fondo-secundario); border-radius: var(--radio); padding: 20px; border: 1px solid var(--borde); margin-bottom: 20px; box-shadow: var(--sombra); }
+/* --- GRÁFICA DE VELAS --- */
+.grafica-contenedor { background: var(--fondo-secundario); border-radius: var(--radio); padding: 20px; border: 1px solid var(--borde); margin-bottom: 20px; }
 .grafica-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
 .activo-selector { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.selector-moneda { background: var(--fondo-terciario); color: var(--texto); border: 1px solid var(--borde); border-radius: 8px; padding: 6px 12px; font-size: 14px; font-weight: 600; outline: none; cursor: pointer; }
+.selector-moneda { background: var(--fondo-terciario); color: var(--texto); border: 1px solid var(--borde); border-radius: 8px; padding: 6px 12px; font-size: 14px; font-weight: 600; outline: none; }
 .selector-moneda:focus { border-color: var(--dorado); }
 .activo-precio { font-size: 22px; font-weight: 800; color: var(--dorado); }
 .activo-cambio { font-size: 14px; font-weight: 600; padding: 4px 12px; border-radius: 20px; background: rgba(14, 203, 129, 0.15); color: var(--verde); }
@@ -165,54 +117,30 @@ a { text-decoration: none; color: inherit; }
 .cargando { text-align: center; padding: 60px 20px; color: var(--texto-secundario); }
 .cargando i { font-size: 32px; color: var(--dorado); animation: girar 1s linear infinite; margin-bottom: 12px; }
 @keyframes girar { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+.error-mensaje { text-align: center; padding: 40px 20px; color: var(--rojo); }
+.error-mensaje i { font-size: 32px; margin-bottom: 12px; }
 
-/* ==============================================
-   💳 TARJETAS Y FORMULARIOS
-   ============================================== */
+/* --- TARJETAS Y FORMULARIOS --- */
 .tarjeta { background: var(--fondo-secundario); border-radius: var(--radio); padding: 16px; margin-bottom: 16px; border: 1px solid var(--borde); }
 .tarjeta-tit { font-weight: 600; font-size: 15px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
 .tarjeta-tit i { color: var(--dorado); }
-.leyenda-banxico { background: rgba(0,51,102,0.08); border: 1px solid rgba(0,51,102,0.3); border-radius: 8px; padding: 12px; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 10px; }
-.leyenda-banxico i { color: var(--azul-banxico); font-size: 20px; margin-top: 2px; }
-.leyenda-banxico h4 { font-size: 13px; font-weight: 600; color: var(--azul-banxico); margin-bottom: 4px; }
-.leyenda-banxico p { font-size: 12px; color: var(--texto-secundario); line-height: 1.5; }
-.metodos-pago { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
-.metodo-pago { background: var(--fondo-terciario); border: 2px solid transparent; border-radius: 12px; padding: 18px; cursor: pointer; display: flex; align-items: center; gap: 16px; }
-.metodo-pago:hover, .metodo-pago.seleccionado { border-color: var(--dorado); background: rgba(240,185,11,0.08); transform: translateY(-2px); }
-.metodo-icono { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
-.oxxo-icon { background: linear-gradient(135deg, #FF5E00, #FF8C00); color: white; }
-.spei-icon { background: linear-gradient(135deg, #009639, #00C853); color: white; }
-.banco-icon { background: linear-gradient(135deg, #003366, #0055AA); color: white; }
-.metodo-info { flex: 1; }
-.metodo-nombre { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
-.metodo-desc { font-size: 12px; color: var(--texto-secundario); }
-.metodo-check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--borde); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.metodo-pago.seleccionado .metodo-check { background: var(--verde); border-color: var(--verde); color: white; }
-.lista-bancos { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 16px; }
-.banco-card { background: var(--fondo-terciario); border: 1px solid var(--borde); border-radius: 10px; padding: 12px; text-align: center; cursor: pointer; }
-.banco-card:hover { border-color: var(--dorado); }
 .form-group { margin-bottom: 16px; }
 .form-label { display: block; font-size: 13px; color: var(--texto-secundario); margin-bottom: 8px; font-weight: 500; }
 .form-input, .form-select { width: 100%; padding: 14px 16px; background: var(--fondo-terciario); border: 1px solid var(--borde); border-radius: 10px; color: var(--texto); font-size: 15px; outline: none; }
 .form-input:focus, .form-select:focus { border-color: var(--dorado); }
-.btn-primario { width: 100%; padding: 16px; background: linear-gradient(90deg, var(--dorado), var(--dorado-claro)); color: #000; border-radius: 10px; font-size: 16px; font-weight: 700; margin-top: 8px; box-shadow: 0 4px 12px rgba(240,185,11,0.25); }
-.btn-primario:hover { transform: translateY(-2px); }
+.btn-primario { width: 100%; padding: 16px; background: linear-gradient(90deg, var(--dorado), var(--dorado-claro)); color: #000; border-radius: 10px; font-size: 16px; font-weight: 700; margin-top: 8px; }
 
-/* ==============================================
-   🧭 BARRA INFERIOR
-   ============================================== */
-.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--fondo-secundario); border-top: 1px solid var(--borde); display: flex; justify-content: space-around; padding: 10px 0 calc(env(safe-area-inset-bottom, 0px) + 10px); z-index: 99; backdrop-filter: blur(12px); }
-.nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.5; transition: var(--transicion); cursor: pointer; padding: 6px 14px; border-radius: 10px; }
+/* --- BARRA INFERIOR --- */
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--fondo-secundario); border-top: 1px solid var(--borde); display: flex; justify-content: space-around; padding: 10px 0; z-index: 99; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.5; cursor: pointer; padding: 6px 14px; border-radius: 10px; }
 .nav-item.activo { opacity: 1; color: var(--dorado); background: rgba(240,185,11,0.1); }
 .nav-item i { font-size: 22px; }
 .nav-item span { font-size: 11px; font-weight: 500; }
 
-/* 📱 RESPONSIVE */
 @media (max-width: 600px) {
     .titulo-dorado-metalico { font-size: 20px; }
     .grafica-canvas { height: 280px; }
     .datos-velas { grid-template-columns: repeat(2, 1fr); }
-    .contenedor { padding: 12px; }
 }
     </style>
 </head>
@@ -232,10 +160,9 @@ a { text-decoration: none; color: inherit; }
     <div class="panel-menu">
         <div class="panel-item" onclick="cerrarMenu(); cambiarPagina('inicio')"><i class="fas fa-home"></i><span>Inicio</span></div>
         <div class="panel-item" onclick="cerrarMenu(); cambiarPagina('mercados')"><i class="fas fa-chart-line"></i><span>Mercados Financieros</span></div>
-        <div class="panel-item" onclick="cerrarMenu(); cambiarPagina('operaciones')"><i class="fas fa-cubes"></i><span>Abrir Operación</span></div>
-        <div class="panel-item" onclick="cerrarMenu(); cambiarPagina('deposito')"><i class="fas fa-plus-circle"></i><span>Depositar Fondos</span></div>
-        <div class="panel-item" onclick="cerrarMenu(); cambiarPagina('retiro')"><i class="fas fa-minus-circle"></i><span>Retirar Fondos</span></div>
-        <div class="panel-item" onclick="cerrarMenu(); cambiarPagina('movimientos')"><i class="fas fa-history"></i><span>Historial</span></div>
+        <div class="panel-item" onclick="cerrarMenu(); cambiarPagina('operaciones')"><i class="fas fa-cubes"></i><span>Operaciones</span></div>
+        <div class="panel-item" onclick="cerrarMenu(); cambiarPagina('deposito')"><i class="fas fa-plus-circle"></i><span>Depositar</span></div>
+        <div class="panel-item" onclick="cerrarMenu(); cambiarPagina('retiro')"><i class="fas fa-minus-circle"></i><span>Retirar</span></div>
         <div class="panel-item" onclick="cerrarMenu(); cambiarPagina('soporte')"><i class="fas fa-headset"></i><span>Atención al Cliente</span></div>
     </div>
 </div>
@@ -256,15 +183,14 @@ a { text-decoration: none; color: inherit; }
 
 <!-- CONTENEDOR PRINCIPAL -->
 <div class="contenedor">
-
-    <!-- 🏠 INICIO CON GRÁFICA BINANCE -->
+    <!-- 🏠 INICIO CON GRÁFICA DE VELAS -->
     <div id="pag-inicio" class="pagina activa">
         <div class="bienvenida">
             <h2 class="titulo-dorado-metalico">¡Bienvenido, Daniel! 🎉</h2>
-            <p>Plataforma de inversión con datos en tiempo real del mercado. Consulta gráficas de velas japonesas, abre operaciones y gestiona tu capital con métodos de pago regulados por el Banco de México.</p>
+            <p>Plataforma de inversión con datos en tiempo real del mercado. Consulta gráficas de velas japonesas, abre operaciones y gestiona tu capital con métodos de pago de México.</p>
         </div>
 
-        <!-- 📊 GRÁFICA CONECTADA A BINANCE API -->
+        <!-- 📊 GRÁFICA DE VELAS JAPONESAS -->
         <div class="grafica-contenedor">
             <div class="grafica-header">
                 <div class="activo-selector">
@@ -278,10 +204,15 @@ a { text-decoration: none; color: inherit; }
                     <span class="activo-precio" id="precioActual">$0.00</span>
                     <span class="activo-cambio" id="cambioPorcentaje">+0.00%</span>
                 </div>
-                <div class="estado-actualizacion"><span class="punto-activo"></span><span id="ultimaActualizacion">Conectando...</span></div>
+                <div class="estado-actualizacion"><span class="punto-activo"></span><span id="ultimaActualizacion">Cargando...</span></div>
             </div>
             <div class="grafica-canvas">
                 <div class="cargando" id="cargando"><i class="fas fa-spinner"></i><p>Cargando datos del mercado...</p></div>
+                <div class="error-mensaje oculto" id="errorMensaje">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>No se pudo conectar</p>
+                    <button class="btn-tiempo" onclick="crearGrafica()">Reintentar</button>
+                </div>
                 <canvas id="graficaVelas" style="display:none;"></canvas>
             </div>
             <div class="grafica-controles">
@@ -312,47 +243,10 @@ a { text-decoration: none; color: inherit; }
         </div>
     </div>
 
-    <!-- 💰 DEPÓSITO -->
-    <div id="pag-deposito" class="pagina">
-        <h1 class="pagina-tit"><i class="fas fa-plus-circle"></i> Depositar Fondos</h1>
-        <div class="leyenda-banxico"><i class="fas fa-landmark"></i><div><h4>Regulación Banxico</h4><p>Los métodos cumplen con las normativas del Banco de México. SPEI® es marca registrada.</p></div></div>
-        <div class="tarjeta">
-            <div class="tarjeta-tit"><i class="fas fa-credit-card"></i> Método de Pago</div>
-            <div class="metodos-pago">
-                <div class="metodo-pago" id="metodo-oxxo" onclick="seleccionarMetodo('oxxo')"><div class="metodo-icono oxxo-icon"><i class="fas fa-store"></i></div><div class="metodo-info"><div class="metodo-nombre">OXXO Pay</div><div class="metodo-desc">Paga en efectivo en tiendas OXXO</div></div><div class="metodo-check"><i class="fas fa-check"></i></div></div>
-                <div class="metodo-pago" id="metodo-spei" onclick="seleccionarMetodo('spei')"><div class="metodo-icono spei-icon"><i class="fas fa-exchange-alt"></i></div><div class="metodo-info"><div class="metodo-nombre">SPEI® Transferencia</div><div class="metodo-desc">Inmediato — Sistema Banxico</div></div><div class="metodo-check"><i class="fas fa-check"></i></div></div>
-                <div class="metodo-pago" id="metodo-banco" onclick="seleccionarMetodo('banco')"><div class="metodo-icono banco-icon"><i class="fas fa-university"></i></div><div class="metodo-info"><div class="metodo-nombre">Bancos de México</div><div class="metodo-desc">BBVA, Santander, Banamex, etc.</div></div><div class="metodo-check"><i class="fas fa-check"></i></div></div>
-            </div>
-            <div id="lista-bancos" class="oculto">
-                <div style="font-weight:600; margin:20px 0 12px;">🏦 Bancos participantes</div>
-                <div class="lista-bancos">
-                    <div class="banco-card">BBVA México</div><div class="banco-card">Santander</div><div class="banco-card">Banamex</div>
-                    <div class="banco-card">Banorte</div><div class="banco-card">HSBC</div><div class="banco-card">Scotiabank</div>
-                </div>
-            </div>
-        </div>
-        <div class="tarjeta">
-            <div class="tarjeta-tit"><i class="fas fa-money-bill-wave"></i> Monto a Depositar</div>
-            <div class="form-group"><label class="form-label">Monto en MXN</label><input type="number" class="form-input" placeholder="$500.00" id="montoDeposito"></div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
-                <button class="btn-tiempo" onclick="document.getElementById('montoDeposito').value='500'">$500</button>
-                <button class="btn-tiempo" onclick="document.getElementById('montoDeposito').value='1000'">$1,000</button>
-                <button class="btn-tiempo" onclick="document.getElementById('montoDeposito').value='2000'">$2,000</button>
-            </div>
-            <button class="btn-primario">Continuar con el Pago</button>
-        </div>
-    </div>
-
     <!-- 📊 MERCADOS -->
     <div id="pag-mercados" class="pagina">
         <h1 class="pagina-tit"><i class="fas fa-chart-pie"></i> Mercados Financieros</h1>
         <p style="color:var(--texto-secundario); margin-bottom:16px;">Selecciona un activo para operar</p>
-        <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin-bottom:16px;">
-            <button class="btn-tiempo activo">₿ Criptomonedas</button>
-            <button class="btn-tiempo">💱 Forex</button>
-            <button class="btn-tiempo">🥇 Materias Primas</button>
-            <button class="btn-tiempo">📈 Índices</button>
-        </div>
         <div class="tarjeta" style="text-align:center; padding:40px;">
             <i class="fas fa-chart-bar" style="font-size:48px; color:var(--dorado); margin-bottom:16px;"></i>
             <p>Activos disponibles en la gráfica principal</p>
@@ -360,31 +254,29 @@ a { text-decoration: none; color: inherit; }
         </div>
     </div>
 
-    <!-- OTRAS PÁGINAS -->
+    <!-- 💱 OTRAS PÁGINAS -->
     <div id="pag-operaciones" class="pagina">
         <h1 class="pagina-tit"><i class="fas fa-cubes"></i> Operaciones Abiertas</h1>
         <div class="tarjeta" style="text-align:center; padding:60px 20px;">
             <i class="fas fa-plus-square" style="font-size:48px; color:var(--dorado); margin-bottom:16px;"></i>
             <p>No tienes operaciones abiertas</p>
-            <button class="btn-primario" style="max-width:250px; margin-top:20px;" onclick="cambiarPagina('inicio')">Ir a Mercados</button>
+        </div>
+    </div>
+
+    <div id="pag-deposito" class="pagina">
+        <h1 class="pagina-tit"><i class="fas fa-plus-circle"></i> Depositar Fondos</h1>
+        <div class="tarjeta">
+            <div class="form-group"><label class="form-label">Monto a Depositar (MXN)</label><input type="number" class="form-input" placeholder="$1,000.00"></div>
+            <button class="btn-primario">Continuar</button>
         </div>
     </div>
 
     <div id="pag-retiro" class="pagina">
         <h1 class="pagina-tit"><i class="fas fa-minus-circle"></i> Retirar Fondos</h1>
-        <div class="leyenda-banxico"><i class="fas fa-landmark"></i><div><h4>Retiros por SPEI</h4><p>Se depositan a tu cuenta bancaria en 1–24 hrs hábiles.</p></div></div>
         <div class="tarjeta">
             <div class="form-group"><label class="form-label">CLABE Interbancaria</label><input type="text" class="form-input" placeholder="18 dígitos"></div>
-            <div class="form-group"><label class="form-label">Monto a Retirar (MXN)</label><input type="number" class="form-input" placeholder="$1,000.00"></div>
+            <div class="form-group"><label class="form-label">Monto a Retirar</label><input type="number" class="form-input" placeholder="$1,000.00"></div>
             <button class="btn-primario">Solicitar Retiro</button>
-        </div>
-    </div>
-
-    <div id="pag-movimientos" class="pagina">
-        <h1 class="pagina-tit"><i class="fas fa-history"></i> Historial de Movimientos</h1>
-        <div class="tarjeta" style="text-align:center; padding:60px;">
-            <i class="fas fa-receipt" style="font-size:48px; color:var(--dorado); margin-bottom:16px;"></i>
-            <p>Aún no tienes movimientos registrados</p>
         </div>
     </div>
 
@@ -394,11 +286,9 @@ a { text-decoration: none; color: inherit; }
             <div style="display:grid; gap:20px;">
                 <div style="display:flex; align-items:center; gap:12px;"><i class="fas fa-envelope" style="color:var(--dorado); font-size:20px;"></i><div><strong>Correo:</strong> soporte@escaladafinanciera.mx</div></div>
                 <div style="display:flex; align-items:center; gap:12px;"><i class="fas fa-phone" style="color:var(--dorado); font-size:20px;"></i><div><strong>Teléfono:</strong> +52 5619015733</div></div>
-                <div style="display:flex; align-items:center; gap:12px;"><i class="fas fa-clock" style="color:var(--dorado); font-size:20px;"></i><div><strong>Horario:</strong> Lunes a Viernes 9:00 – 18:00 hrs</div></div>
             </div>
         </div>
     </div>
-
 </div>
 
 <!-- BARRA INFERIOR -->
@@ -407,80 +297,98 @@ a { text-decoration: none; color: inherit; }
     <div class="nav-item" onclick="cambiarPagina('mercados')"><i class="fas fa-chart-line"></i><span>Mercados</span></div>
     <div class="nav-item" onclick="cambiarPagina('deposito')"><i class="fas fa-wallet"></i><span>Depositar</span></div>
     <div class="nav-item" onclick="cambiarPagina('operaciones')"><i class="fas fa-cubes"></i><span>Operaciones</span></div>
-    <div class="nav-item" onclick="cambiarPagina('movimientos')"><i class="fas fa-user"></i><span>Perfil</span></div>
+    <div class="nav-item" onclick="cambiarPagina('soporte')"><i class="fas fa-user"></i><span>Perfil</span></div>
 </div>
 
 <!-- ==============================================
-   ⚙️ SCRIPTS — FUNCIONALIDAD COMPLETA
+   ⚙️ SCRIPTS — GRÁFICA DE VELAS FUNCIONAL
    ============================================== -->
 <script>
-// --- NAVEGACIÓN GENERAL ---
+// --- NAVEGACIÓN ---
 function abrirMenu() { document.getElementById('panelLateral').classList.add('activo'); document.getElementById('overlay').classList.add('activo'); document.body.style.overflow='hidden'; }
 function cerrarMenu() { document.getElementById('panelLateral').classList.remove('activo'); document.getElementById('overlay').classList.remove('activo'); document.body.style.overflow=''; }
 function cambiarPagina(nombre) {
     document.querySelectorAll('.pagina').forEach(p => p.classList.remove('activa'));
     document.getElementById('pag-'+nombre).classList.add('activa');
     document.querySelectorAll('.nav-item').forEach((n,i) => n.classList.toggle('activo', 
-        (nombre==='inicio'&&i===0) || (nombre==='mercados'&&i===1) || (nombre==='deposito'&&i===2) || (nombre==='operaciones'&&i===3) || (nombre==='movimientos'&&i===4)));
+        (nombre==='inicio'&&i===0) || (nombre==='mercados'&&i===1) || (nombre==='deposito'&&i===2) || (nombre==='operaciones'&&i===3) || (nombre==='soporte'&&i===4)));
     window.scrollTo(0,0);
 }
 
-// --- MÉTODOS DE PAGO ---
-let metodoSeleccionado = null;
-function seleccionarMetodo(metodo) {
-    document.querySelectorAll('.metodo-pago').forEach(m => m.classList.remove('seleccionado'));
-    document.getElementById('metodo-'+metodo).classList.add('seleccionado');
-    metodoSeleccionado = metodo;
-    document.getElementById('lista-bancos').classList.toggle('oculto', metodo!=='banco');
-}
-
 // ==============================================
-// 📈 GRÁFICA BINANCE API — INTEGRADA
+// 📈 GRÁFICA DE VELAS — CON PROXY PARA EVITAR CORS
 // ==============================================
 let grafica = null;
 let activoActual = 'BTCUSDT';
 let intervaloActual = '4h';
 let actualizarIntervalo = null;
-const API_BASE = 'https://api.binance.com/api/v3';
 
-async function obtenerVelas(simbolo, intervalo, limite=80) {
+// ✅ Proxy público para evitar bloqueo CORS de Binance
+const PROXY = 'https://api.allorigins.win/raw?url=';
+const API_BINANCE = 'https://api.binance.com/api/v3';
+
+// Obtener velas (candlestick)
+async function obtenerVelas(simbolo, intervalo, limite = 80) {
     try {
-        const res = await fetch(`${API_BASE}/klines?symbol=${simbolo}&interval=${intervalo}&limit=${limite}`, { signal: AbortSignal.timeout(8000) });
-        if (!res.ok) throw new Error('Error');
+        const url = `${PROXY}${encodeURIComponent(`${API_BINANCE}/klines?symbol=${simbolo}&interval=${intervalo}&limit=${limite}`)}`;
+        const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
+        if (!res.ok) throw new Error(`Error: ${res.status}`);
         return await res.json();
-    } catch(e) { console.error(e); return null; }
+    } catch (e) {
+        console.error('Error velas:', e);
+        return null;
+    }
 }
 
+// Obtener precio actual 24h
 async function obtenerPrecioActual(simbolo) {
     try {
-        const res = await fetch(`${API_BASE}/ticker/24hr?symbol=${simbolo}`);
+        const url = `${PROXY}${encodeURIComponent(`${API_BINANCE}/ticker/24hr?symbol=${simbolo}`)}`;
+        const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
         if (!res.ok) throw new Error('Error');
         return await res.json();
-    } catch(e) { return null; }
+    } catch (e) {
+        console.error('Error precio:', e);
+        return null;
+    }
 }
 
+// Formatear datos para Chart.js
 function formatearDatosVelas(datosBrutos) {
     if (!datosBrutos || !datosBrutos.length) return [];
     return datosBrutos.map(v => ({
-        x: new Date(v[0]), o: parseFloat(v[1]), h: parseFloat(v[2]), l: parseFloat(v[3]), c: parseFloat(v[4]), v: parseFloat(v[5])
+        x: v[0],
+        o: parseFloat(v[1]),
+        h: parseFloat(v[2]),
+        l: parseFloat(v[3]),
+        c: parseFloat(v[4]),
+        v: parseFloat(v[5])
     }));
 }
 
+// ✅ CREAR GRÁFICA DE VELAS JAPONESAS
 async function crearGrafica() {
+    // Mostrar cargando
     document.getElementById('cargando').style.display = 'block';
+    document.getElementById('errorMensaje').classList.add('oculto');
     document.getElementById('graficaVelas').style.display = 'none';
     
+    // Obtener datos
     const [datosVelas, datosPrecio] = await Promise.all([
         obtenerVelas(activoActual, intervaloActual, 80),
         obtenerPrecioActual(activoActual)
     ]);
     
+    // Manejar error
     if (!datosVelas || !datosVelas.length) {
-        document.getElementById('cargando').innerHTML = '<i class="fas fa-exclamation-triangle"></i><p>No se pudieron cargar los datos</p>';
+        document.getElementById('cargando').style.display = 'none';
+        document.getElementById('errorMensaje').classList.remove('oculto');
         return;
     }
     
     const datosFormateados = formatearDatosVelas(datosVelas);
+    
+    // Ocultar cargando, mostrar gráfica
     document.getElementById('cargando').style.display = 'none';
     const canvas = document.getElementById('graficaVelas');
     canvas.style.display = 'block';
@@ -489,16 +397,19 @@ async function crearGrafica() {
     if (datosPrecio) {
         const precio = parseFloat(datosPrecio.lastPrice);
         const cambio = parseFloat(datosPrecio.priceChangePercent);
-        document.getElementById('precioActual').textContent = '$' + precio.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+        
+        document.getElementById('precioActual').textContent = 
+            '$' + precio.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        
         const elemCambio = document.getElementById('cambioPorcentaje');
-        elemCambio.textContent = (cambio>=0?'+':'') + cambio.toFixed(2) + '%';
-        elemCambio.classList.toggle('bajada', cambio<0);
-        elemCambio.style.background = cambio>=0 ? 'rgba(14,203,129,0.15)' : 'rgba(246,70,93,0.15)';
-        elemCambio.style.color = cambio>=0 ? '#0ECB81' : '#F6465D';
+        elemCambio.textContent = (cambio >= 0 ? '+' : '') + cambio.toFixed(2) + '%';
+        elemCambio.classList.toggle('bajada', cambio < 0);
+        elemCambio.style.background = cambio >= 0 ? 'rgba(14,203,129,0.15)' : 'rgba(246,70,93,0.15)';
+        elemCambio.style.color = cambio >= 0 ? '#0ECB81' : '#F6465D';
     }
     
     // Última vela
-    const ultima = datosFormateados[datosFormateados.length-1];
+    const ultima = datosFormateados[datosFormateados.length - 1];
     if (ultima) {
         document.getElementById('datoApertura').textContent = '$' + ultima.o.toFixed(2);
         document.getElementById('datoMaximo').textContent = '$' + ultima.h.toFixed(2);
@@ -507,7 +418,10 @@ async function crearGrafica() {
         document.getElementById('datoVolumen').textContent = ultima.v.toFixed(0);
     }
     
+    // Destruir anterior
     if (grafica) grafica.destroy();
+    
+    // 🎨 DIBUJAR VELAS JAPONESAS
     const ctx = canvas.getContext('2d');
     grafica = new Chart(ctx, {
         type: 'candlestick',
@@ -520,48 +434,81 @@ async function crearGrafica() {
             }]
         },
         options: {
-            responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 300 },
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: '#1E2329', titleColor: '#EAECEF', bodyColor: '#EAECEF',
-                    borderColor: '#2B3139', borderWidth: 1, padding: 12, cornerRadius: 8,
-                    callbacks: { label: ctx => {
-                        const v = ctx.raw;
-                        return [`Apertura: $${v.o.toFixed(2)}`, `Máximo: $${v.h.toFixed(2)}`, `Mínimo: $${v.l.toFixed(2)}`, `Cierre: $${v.c.toFixed(2)}`, `Volumen: ${v.v.toFixed(0)}`];
-                    }}
+                    backgroundColor: '#1E2329',
+                    titleColor: '#EAECEF',
+                    bodyColor: '#EAECEF',
+                    borderColor: '#2B3139',
+                    borderWidth: 1,
+                    padding: 12,
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: ctx => {
+                            const v = ctx.raw;
+                            return [
+                                `Apertura: $${v.o.toFixed(2)}`,
+                                `Máximo: $${v.h.toFixed(2)}`,
+                                `Mínimo: $${v.l.toFixed(2)}`,
+                                `Cierre: $${v.c.toFixed(2)}`,
+                                `Volumen: ${v.v.toFixed(0)}`
+                            ];
+                        }
+                    }
                 }
             },
             scales: {
-                x: { grid: { color: 'rgba(43,49,57,0.5)' }, ticks: { color: '#848E9C', maxTicksLimit: 10, callback: v => {
-                    const d = new Date(v);
-                    return `${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
-                }}},
-                y: { position: 'right', grid: { color: 'rgba(43,49,57,0.5)' }, ticks: { color: '#848E9C', callback: v => '$' + v.toLocaleString() }}
+                x: {
+                    type: 'time',
+                    time: { unit: 'minute' },
+                    grid: { color: 'rgba(43,49,57,0.5)' },
+                    ticks: { color: '#848E9C', maxTicksLimit: 10 }
+                },
+                y: {
+                    position: 'right',
+                    grid: { color: 'rgba(43,49,57,0.5)' },
+                    ticks: { color: '#848E9C', callback: v => '$' + v.toLocaleString() }
+                }
             }
         }
     });
-    actualizarTiempo();
+    
+    // Actualizar hora
+    document.getElementById('ultimaActualizacion').textContent = 'Actualizado: ' + new Date().toLocaleTimeString();
 }
 
-async function actualizarGrafica() {
-    if (!grafica) return;
-    const [datosVelas, datosPrecio] = await Promise.all([
-        obtenerVelas(activoActual, intervaloActual, 80),
-        obtenerPrecioActual(activoActual)
-    ]);
-    if (!datosVelas) return;
-    const datosFormateados = formatearDatosVelas(datosVelas);
-    
-    if (datosPrecio) {
-        const precio = parseFloat(datosPrecio.lastPrice);
-        const cambio = parseFloat(datosPrecio.priceChangePercent);
-        document.getElementById('precioActual').textContent = '$' + precio.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-        const elemCambio = document.getElementById('cambioPorcentaje');
-        elemCambio.textContent = (cambio>=0?'+':'') + cambio.toFixed(2) + '%';
-        elemCambio.classList.toggle('bajada', cambio<0);
-    }
-    
-    const ultima = datosFormateados[datosFormateados.length-1];
-    if (ultima) {
-        document.getElementById
+// Cambiar activo
+function cambiarActivo() {
+    activoActual = document.getElementById('selectorMoneda').value;
+    crearGrafica();
+}
+
+// Cambiar intervalo
+function cambiarIntervalo(intervalo) {
+    intervaloActual = intervalo;
+    document.querySelectorAll('.btn-tiempo').forEach(b => b.classList.remove('activo'));
+    event.target.classList.add('activo');
+    crearGrafica();
+}
+
+// Actualizar automáticamente cada 30 segundos
+function iniciarActualizacion() {
+    if (actualizarIntervalo) clearInterval(actualizarIntervalo);
+    actualizarIntervalo = setInterval(() => {
+        if (document.visibilityState === 'visible') crearGrafica();
+    }, 30000);
+}
+
+// Iniciar al cargar la página
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(crearGrafica, 500);
+    iniciarActualizacion();
+});
+</script>
+
+</body>
+</html>
